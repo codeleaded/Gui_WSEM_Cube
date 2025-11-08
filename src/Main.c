@@ -27,7 +27,7 @@ void Setup(AlxWindow* w){
 	Menu_Set(1);
 
 	cam = Camera_Make(
-		(vec3d){ 0.0f,0.0f,-1.0f,1.0f },
+		(vec3d){ 0.0f,0.0f,-3.0f,1.0f },
 		(vec3d){ 0.0f,0.0f,0.0f,1.0f },
 		(vec3d){ 0.0f,0.0f,0.0f,1.0f },
 		90.0f
@@ -105,7 +105,7 @@ void Delete(AlxWindow* w){
 }
 
 int main(){
-    if(Create("Gravity Simulation",2500,1200,1,1,Setup,Update,Delete))
+    if(Create("Rotating Cube Simulation",2500,1200,1,1,Setup,Update,Delete))
         Start();
     return 0;
 }
