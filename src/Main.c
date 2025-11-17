@@ -1,8 +1,8 @@
 #include "/home/codeleaded/System/Static/Library/WindowEngine1.0.h"
 
-#include "./inc/Lib3D_Cube.h"
-#include "./inc/Lib3D_Mathlib.h"
-#include "./inc/Lib3D_Mesh.h"
+#include "../inc/Lib3D_Cube.h"
+#include "../inc/Lib3D_Mathlib.h"
+#include "../inc/Lib3D_Mesh.h"
 
 
 Camera cam;

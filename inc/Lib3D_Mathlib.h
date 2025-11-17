@@ -1,8 +1,8 @@
 #ifndef LIB3D_MATH_H
 #define LIB3D_MATH_H
 
-#include "../Container/Vector.h"
-#include "Vector2.h"
+#include "/home/codeleaded/System/Static/Container/Vector.h"
+#include "/home/codeleaded/System/Static/Library/Vector2.h"
 
 typedef struct vec2d{
 	float u;

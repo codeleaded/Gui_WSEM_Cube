@@ -1,8 +1,8 @@
 #ifndef LIB3D_WORLD3D_H
 #define LIB3D_WORLD3D_H
 
-#include "Files.h"
-#include "ConstParser.h"
+#include "/home/codeleaded/System/Static/Library/Files.h"
+#include "/home/codeleaded/System/Static/Library/ConstParser.h"
 #include "Lib3D_Mathlib.h"
 
 
