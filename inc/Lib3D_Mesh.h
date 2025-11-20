@@ -6,15 +6,15 @@
 #include "Lib3D_Mathlib.h"
 
 
-typedef Vector Mesh;// Vector<triangle>
+typedef Vector Mesh;// Vector<Tri3D>
 
 Mesh Mesh_New(){
-	return Vector_New(sizeof(triangle));
+	return Vector_New(sizeof(Tri3D));
 }
-void Mesh_Shade(Mesh* m,vec3d dir){
+void Mesh_Shade(Mesh* m,Vec3D dir){
 	for(int i = 0;i<m->size;i++){
-		triangle* t = (triangle*)Vector_Get(m,i);
-		triangle_ShadeNorm(t,dir);
+		Tri3D* t = (Tri3D*)Vector_Get(m,i);
+		Tri3D_ShadeNorm(t,dir);
 	}
 }
 void Mesh_Read(Mesh* m,char* Path){
@@ -24,7 +24,7 @@ void Mesh_Read(Mesh* m,char* Path){
 		return;
 	}
 
-	Vector verts = Vector_New(sizeof(vec3d));
+	Vector verts = Vector_New(sizeof(Vec3D));
 
 	FilesSize fs;
 	char* Content = Files_ReadTB(Path,&fs);
@@ -40,7 +40,7 @@ void Mesh_Read(Mesh* m,char* Path){
 
 		//char junk;
 		if(lineIn[0] == 'v'){
-			vec3d v = vec3d_Null();
+			Vec3D v = Vec3D_Null();
 			
 			Vector vec = CStr_ChopDown(lineIn,' ');
 			//junk = *(char*)Vector_Get(&vec,0);
@@ -63,15 +63,15 @@ void Mesh_Read(Mesh* m,char* Path){
 			for(int i = 0;i<vec.size;i++) free(*(char**)Vector_Get(&vec,i));
 			Vector_Free(&vec);
 			
-			triangle t = {
+			Tri3D t = {
 				.p = {
-					*(vec3d*)Vector_Get(&verts,f[0] - 1),
-					*(vec3d*)Vector_Get(&verts,f[1] - 1),
-					*(vec3d*)Vector_Get(&verts,f[2] - 1)
+					*(Vec3D*)Vector_Get(&verts,f[0] - 1),
+					*(Vec3D*)Vector_Get(&verts,f[1] - 1),
+					*(Vec3D*)Vector_Get(&verts,f[2] - 1)
 				},
 				.c = 0xFFFFFFFF
 			};
-			triangle_CalcNorm(&t);
+			Tri3D_CalcNorm(&t);
 			Vector_Push(m,&t);
 		}
 	
@@ -85,8 +85,8 @@ void Mesh_Read(Mesh* m,char* Path){
 // 		return;
 // 	}
 
-// 	Vector verts = Vector_New(sizeof(vec3d));
-// 	Vector texs = Vector_New(sizeof(vec2d));
+// 	Vector verts = Vector_New(sizeof(Vec3D));
+// 	Vector texs = Vector_New(sizeof(Vec2D));
 
 // 	char* Content = Files_Path(Path);
 // 	int end = -1;
@@ -100,14 +100,14 @@ void Mesh_Read(Mesh* m,char* Path){
 
 // 		if (line[0] == 'v'){
 // 			if (line[1] == 't'){
-// 				vec2d v;
+// 				Vec2D v;
 // 				s >> junk >> junk >> v.u >> v.v;
 // 				// A little hack for the spyro texture
 // 				//v.u = 1.0f - v.u;
 // 				//v.v = 1.0f - v.v;
 // 				texs.push_back(v);
 // 			}else{
-// 				vec3d v;
+// 				Vec3D v;
 // 				s >> junk >> v.x >> v.y >> v.z;
 // 				verts.push_back(v);
 // 			}
@@ -161,18 +161,18 @@ typedef struct World3D{
 	Mesh trisIn;
 	Mesh trisBuff;
 	Mesh trisOut;
-	mat4x4 model;
-	mat4x4 view;
-	mat4x4 proj;
+	M4x4D model;
+	M4x4D view;
+	M4x4D proj;
 	unsigned int normal : 2;
 	unsigned int flags : 31;
 } World3D;
 
 World3D World3D_New(){
 	World3D m;
-	m.trisIn = Vector_New(sizeof(triangle));
-	m.trisBuff = Vector_New(sizeof(triangle));
-	m.trisOut = Vector_New(sizeof(triangle));
+	m.trisIn = Vector_New(sizeof(Tri3D));
+	m.trisBuff = Vector_New(sizeof(Tri3D));
+	m.trisOut = Vector_New(sizeof(Tri3D));
 	m.model = Matrix_MakeIdentity();
 	m.view = Matrix_MakeIdentity();
 	m.proj = Matrix_MakeIdentity();
@@ -180,11 +180,11 @@ World3D World3D_New(){
 	m.flags = 0;
 	return m;
 }
-World3D World3D_Make(mat4x4 model,mat4x4 view,mat4x4 proj){
+World3D World3D_Make(M4x4D model,M4x4D view,M4x4D proj){
 	World3D m;
-	m.trisIn = Vector_New(sizeof(triangle));
-	m.trisBuff = Vector_New(sizeof(triangle));
-	m.trisOut = Vector_New(sizeof(triangle));
+	m.trisIn = Vector_New(sizeof(Tri3D));
+	m.trisBuff = Vector_New(sizeof(Tri3D));
+	m.trisOut = Vector_New(sizeof(Tri3D));
 	m.model = model;
 	m.view = view;
 	m.proj = proj;
@@ -193,34 +193,34 @@ World3D World3D_Make(mat4x4 model,mat4x4 view,mat4x4 proj){
 	return m;
 }
 
-void World3D_Set_Model(World3D* m,mat4x4 model){
+void World3D_Set_Model(World3D* m,M4x4D model){
 	m->model = model;
 }
-void World3D_Set_View(World3D* m,mat4x4 view){
+void World3D_Set_View(World3D* m,M4x4D view){
 	m->view = view;
 }
-void World3D_Set_Proj(World3D* m,mat4x4 proj){
+void World3D_Set_Proj(World3D* m,M4x4D proj){
 	m->proj = proj;
 }
 
 int World3D_Compare(const void* e1,const void* e2) {
-	triangle t1 = *(triangle*)e1;
-	triangle t2 = *(triangle*)e2;
+	Tri3D t1 = *(Tri3D*)e1;
+	Tri3D t2 = *(Tri3D*)e2;
 	float z1 = (t1.p[0].z+t1.p[1].z+t1.p[2].z)/3;
     float z2 = (t2.p[0].z+t2.p[1].z+t2.p[2].z)/3;
     return z1 == z2 ? 0 : (z1 < z2 ? 1 : -1);
 }
-void World3D_triangle_process(World3D* m,triangle* t,vec3d camera,Vec2 output){
-	triangle tri = *t;
+void World3D_Tri3D_process(World3D* m,Tri3D* t,Vec3D camera,Vec2 output){
+	Tri3D tri = *t;
 	
 	tri.p[0] = Matrix_MultiplyVector(m->model,tri.p[0]);
 	tri.p[1] = Matrix_MultiplyVector(m->model,tri.p[1]);
 	tri.p[2] = Matrix_MultiplyVector(m->model,tri.p[2]);
-	triangle_CalcNorm(&tri);
-	triangle_ShadeNorm(&tri,(vec3d){ 0.2f,0.1f,-0.6f });
+	Tri3D_CalcNorm(&tri);
+	Tri3D_ShadeNorm(&tri,(Vec3D){ 0.2f,0.1f,-0.6f });
 	
-	vec3d vCameraRay = vec3d_Sub(tri.p[0],camera);
-	float dp = vec3d_DotProduct(tri.n,vCameraRay);
+	Vec3D vCameraRay = Vec3D_Sub(tri.p[0],camera);
+	float dp = Vec3D_DotProduct(tri.n,vCameraRay);
 
 	char c = 0;
 	if(m->normal == WORLD3D_NORMAL_NONE) 					c = 1;
@@ -233,16 +233,16 @@ void World3D_triangle_process(World3D* m,triangle* t,vec3d camera,Vec2 output){
 		tri.p[2] = Matrix_MultiplyVector(m->view,tri.p[2]);
 		
 		int nClippedTriangles = 0;
-		triangle clipped[2];
-		nClippedTriangles = triangle_ClipAgainstPlane(vec3d_New(0.0f,0.0f,0.1f),vec3d_New(0.0f,0.0f,1.0f),tri,&clipped[0],&clipped[1]);
+		Tri3D clipped[2];
+		nClippedTriangles = Tri3D_ClipAgainstPlane(Vec3D_New(0.0f,0.0f,0.1f),Vec3D_New(0.0f,0.0f,1.0f),tri,&clipped[0],&clipped[1]);
 		for (int n = 0; n < nClippedTriangles; n++){
 			clipped[n].p[0] = Matrix_MultiplyVector(m->proj, clipped[n].p[0]);
 			clipped[n].p[1] = Matrix_MultiplyVector(m->proj, clipped[n].p[1]);
 			clipped[n].p[2] = Matrix_MultiplyVector(m->proj, clipped[n].p[2]);
 			
-			clipped[n].p[0] = vec3d_Div(clipped[n].p[0], clipped[n].p[0].w);
-			clipped[n].p[1] = vec3d_Div(clipped[n].p[1], clipped[n].p[1].w);
-			clipped[n].p[2] = vec3d_Div(clipped[n].p[2], clipped[n].p[2].w);
+			clipped[n].p[0] = Vec3D_Div(clipped[n].p[0], clipped[n].p[0].w);
+			clipped[n].p[1] = Vec3D_Div(clipped[n].p[1], clipped[n].p[1].w);
+			clipped[n].p[2] = Vec3D_Div(clipped[n].p[2], clipped[n].p[2].w);
 			
 			clipped[n].p[0].x *= -1.0f;
 			clipped[n].p[1].x *= -1.0f;
@@ -251,10 +251,10 @@ void World3D_triangle_process(World3D* m,triangle* t,vec3d camera,Vec2 output){
 			clipped[n].p[1].y *= -1.0f;
 			clipped[n].p[2].y *= -1.0f;
 
-			vec3d vOffsetView = vec3d_New( 1,1,0 );
-			clipped[n].p[0] = vec3d_Add(clipped[n].p[0], vOffsetView);
-			clipped[n].p[1] = vec3d_Add(clipped[n].p[1], vOffsetView);
-			clipped[n].p[2] = vec3d_Add(clipped[n].p[2], vOffsetView);
+			Vec3D vOffsetView = Vec3D_New( 1,1,0 );
+			clipped[n].p[0] = Vec3D_Add(clipped[n].p[0], vOffsetView);
+			clipped[n].p[1] = Vec3D_Add(clipped[n].p[1], vOffsetView);
+			clipped[n].p[2] = Vec3D_Add(clipped[n].p[2], vOffsetView);
 			clipped[n].p[0].x *= 0.5f * output.x;
 			clipped[n].p[0].y *= 0.5f * output.y;
 			clipped[n].p[1].x *= 0.5f * output.x;
@@ -265,22 +265,22 @@ void World3D_triangle_process(World3D* m,triangle* t,vec3d camera,Vec2 output){
 		}			
 	}
 }
-void World3D_update(World3D* m,vec3d p,Vec2 output){
+void World3D_update(World3D* m,Vec3D p,Vec2 output){
 	Vector_Clear(&m->trisBuff);
 	Vector_Clear(&m->trisOut);
 
 	for(int i = 0;i<m->trisIn.size;i++){
-		triangle* t = (triangle*)Vector_Get(&m->trisIn,i);
-		World3D_triangle_process(m,t,p,output);
+		Tri3D* t = (Tri3D*)Vector_Get(&m->trisIn,i);
+		World3D_Tri3D_process(m,t,p,output);
 	}
 	
 	qsort(m->trisBuff.Memory,m->trisBuff.size,m->trisBuff.ELEMENT_SIZE,World3D_Compare);
 
 	for(int i = 0;i<m->trisBuff.size;i++){
-		triangle* triToRaster = (triangle*)Vector_Get(&m->trisBuff,i);
-		triangle clipped[2];
+		Tri3D* triToRaster = (Tri3D*)Vector_Get(&m->trisBuff,i);
+		Tri3D clipped[2];
 
-		Vector list = Vector_New(sizeof(triangle));
+		Vector list = Vector_New(sizeof(Tri3D));
 		Vector_Push(&list,triToRaster);
 		int nNewTriangles = 1;
 
@@ -289,16 +289,16 @@ void World3D_update(World3D* m,vec3d p,Vec2 output){
 			int nTrisToAdd = 0;
 			while (nNewTriangles > 0)
 			{
-				triangle test = *(triangle*)Vector_Get(&list,0);
+				Tri3D test = *(Tri3D*)Vector_Get(&list,0);
 				Vector_Remove(&list,0);
 				nNewTriangles--;
 
 				switch (p)
 				{
-				case 0:	nTrisToAdd = triangle_ClipAgainstPlane(vec3d_New( 0.0f, 0.0f, 0.0f ), 		 vec3d_New( 0.0f, 1.0f, 0.0f ), test, &clipped[0], &clipped[1]); break;
-				case 1:	nTrisToAdd = triangle_ClipAgainstPlane(vec3d_New( 0.0f, output.y - 1, 0.0f ),vec3d_New( 0.0f, -1.0f, 0.0f ),test, &clipped[0], &clipped[1]); break;
-				case 2:	nTrisToAdd = triangle_ClipAgainstPlane(vec3d_New( 0.0f, 0.0f, 0.0f ), 		 vec3d_New( 1.0f, 0.0f, 0.0f ), test, &clipped[0], &clipped[1]); break;
-				case 3:	nTrisToAdd = triangle_ClipAgainstPlane(vec3d_New( output.x - 1, 0.0f, 0.0f ),vec3d_New( -1.0f, 0.0f, 0.0f ),test, &clipped[0], &clipped[1]); break;
+				case 0:	nTrisToAdd = Tri3D_ClipAgainstPlane(Vec3D_New( 0.0f, 0.0f, 0.0f ), 		 Vec3D_New( 0.0f, 1.0f, 0.0f ), test, &clipped[0], &clipped[1]); break;
+				case 1:	nTrisToAdd = Tri3D_ClipAgainstPlane(Vec3D_New( 0.0f, output.y - 1, 0.0f ),Vec3D_New( 0.0f, -1.0f, 0.0f ),test, &clipped[0], &clipped[1]); break;
+				case 2:	nTrisToAdd = Tri3D_ClipAgainstPlane(Vec3D_New( 0.0f, 0.0f, 0.0f ), 		 Vec3D_New( 1.0f, 0.0f, 0.0f ), test, &clipped[0], &clipped[1]); break;
+				case 3:	nTrisToAdd = Tri3D_ClipAgainstPlane(Vec3D_New( output.x - 1, 0.0f, 0.0f ),Vec3D_New( -1.0f, 0.0f, 0.0f ),test, &clipped[0], &clipped[1]); break;
 				}
 
 				for (int w = 0; w < nTrisToAdd; w++)

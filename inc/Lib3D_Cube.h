@@ -52,16 +52,16 @@
 #define LIB3D_CUBE_S0_BOTTOM	(1U << 10)
 #define LIB3D_CUBE_S1_BOTTOM	(1U << 11)
 
-vec3d Lib3D_Cube_NS(int s){
+Vec3D Lib3D_Cube_NS(int s){
 	switch (s){
-	case LIB3D_CUBE_SIDE_SOUTH: 	return (vec3d){ 0.0f, 0.0f,-1.0f,1.0f };
-	case LIB3D_CUBE_SIDE_EAST: 		return (vec3d){ 1.0f, 0.0f, 0.0f,1.0f };
-	case LIB3D_CUBE_SIDE_NORTH: 	return (vec3d){ 0.0f, 0.0f, 1.0f,1.0f };
-	case LIB3D_CUBE_SIDE_WEST: 		return (vec3d){-1.0f, 0.0f, 0.0f,1.0f };
-	case LIB3D_CUBE_SIDE_TOP: 		return (vec3d){ 0.0f, 1.0f, 0.0f,1.0f };
-	case LIB3D_CUBE_SIDE_BOTTOM: 	return (vec3d){ 0.0f,-1.0f, 0.0f,1.0f };
+	case LIB3D_CUBE_SIDE_SOUTH: 	return (Vec3D){ 0.0f, 0.0f,-1.0f,1.0f };
+	case LIB3D_CUBE_SIDE_EAST: 		return (Vec3D){ 1.0f, 0.0f, 0.0f,1.0f };
+	case LIB3D_CUBE_SIDE_NORTH: 	return (Vec3D){ 0.0f, 0.0f, 1.0f,1.0f };
+	case LIB3D_CUBE_SIDE_WEST: 		return (Vec3D){-1.0f, 0.0f, 0.0f,1.0f };
+	case LIB3D_CUBE_SIDE_TOP: 		return (Vec3D){ 0.0f, 1.0f, 0.0f,1.0f };
+	case LIB3D_CUBE_SIDE_BOTTOM: 	return (Vec3D){ 0.0f,-1.0f, 0.0f,1.0f };
 	}
-	return (vec3d){ 0.0f,0.0f,0.0f,1.0f };
+	return (Vec3D){ 0.0f,0.0f,0.0f,1.0f };
 }
 int Lib3D_Cube_SO(int s){
 	switch (s){
@@ -74,41 +74,41 @@ int Lib3D_Cube_SO(int s){
 	}
 	return LIB3D_CUBE_SIDE_SOUTH;
 }
-vec3d Lib3D_Cube_AS(int s){
+Vec3D Lib3D_Cube_AS(int s){
 	switch (s){
-		case LIB3D_CUBE_SIDE_000: return (vec3d){-1.0f,-1.0f,-1.0f,1.0f };
-		case LIB3D_CUBE_SIDE_001: return (vec3d){-1.0f,-1.0f, 0.0f,1.0f };
-		case LIB3D_CUBE_SIDE_100: return (vec3d){ 0.0f,-1.0f,-1.0f,1.0f };
-		case LIB3D_CUBE_SIDE_101: return (vec3d){ 0.0f,-1.0f, 0.0f,1.0f };
-		case LIB3D_CUBE_SIDE_002: return (vec3d){-1.0f,-1.0f, 1.0f,1.0f };
-		case LIB3D_CUBE_SIDE_102: return (vec3d){ 0.0f,-1.0f, 1.0f,1.0f };
-		case LIB3D_CUBE_SIDE_200: return (vec3d){ 1.0f,-1.0f,-1.0f,1.0f };
-		case LIB3D_CUBE_SIDE_201: return (vec3d){ 1.0f,-1.0f, 0.0f,1.0f };
-		case LIB3D_CUBE_SIDE_202: return (vec3d){ 1.0f,-1.0f, 1.0f,1.0f };
-		case LIB3D_CUBE_SIDE_010: return (vec3d){-1.0f, 0.0f,-1.0f,1.0f };
-		case LIB3D_CUBE_SIDE_011: return (vec3d){-1.0f, 0.0f, 0.0f,1.0f };
-		case LIB3D_CUBE_SIDE_110: return (vec3d){ 0.0f, 0.0f,-1.0f,1.0f };
-		case LIB3D_CUBE_SIDE_111: return (vec3d){ 0.0f, 0.0f, 0.0f,1.0f };
-		case LIB3D_CUBE_SIDE_012: return (vec3d){-1.0f, 0.0f, 1.0f,1.0f };
-		case LIB3D_CUBE_SIDE_112: return (vec3d){ 0.0f, 0.0f, 1.0f,1.0f };
-		case LIB3D_CUBE_SIDE_210: return (vec3d){ 1.0f, 0.0f,-1.0f,1.0f };
-		case LIB3D_CUBE_SIDE_211: return (vec3d){ 1.0f, 0.0f, 0.0f,1.0f };
-		case LIB3D_CUBE_SIDE_212: return (vec3d){ 1.0f, 0.0f, 1.0f,1.0f };
-		case LIB3D_CUBE_SIDE_020: return (vec3d){-1.0f, 1.0f,-1.0f,1.0f };
-		case LIB3D_CUBE_SIDE_021: return (vec3d){-1.0f, 1.0f, 0.0f,1.0f };
-		case LIB3D_CUBE_SIDE_120: return (vec3d){ 0.0f, 1.0f,-1.0f,1.0f };
-		case LIB3D_CUBE_SIDE_121: return (vec3d){ 0.0f, 1.0f, 0.0f,1.0f };
-		case LIB3D_CUBE_SIDE_022: return (vec3d){-1.0f, 1.0f, 1.0f,1.0f };
-		case LIB3D_CUBE_SIDE_122: return (vec3d){ 0.0f, 1.0f, 1.0f,1.0f };
-		case LIB3D_CUBE_SIDE_220: return (vec3d){ 1.0f, 1.0f,-1.0f,1.0f };
-		case LIB3D_CUBE_SIDE_221: return (vec3d){ 1.0f, 1.0f, 0.0f,1.0f };
-		case LIB3D_CUBE_SIDE_222: return (vec3d){ 1.0f, 1.0f, 1.0f,1.0f };
+		case LIB3D_CUBE_SIDE_000: return (Vec3D){-1.0f,-1.0f,-1.0f,1.0f };
+		case LIB3D_CUBE_SIDE_001: return (Vec3D){-1.0f,-1.0f, 0.0f,1.0f };
+		case LIB3D_CUBE_SIDE_100: return (Vec3D){ 0.0f,-1.0f,-1.0f,1.0f };
+		case LIB3D_CUBE_SIDE_101: return (Vec3D){ 0.0f,-1.0f, 0.0f,1.0f };
+		case LIB3D_CUBE_SIDE_002: return (Vec3D){-1.0f,-1.0f, 1.0f,1.0f };
+		case LIB3D_CUBE_SIDE_102: return (Vec3D){ 0.0f,-1.0f, 1.0f,1.0f };
+		case LIB3D_CUBE_SIDE_200: return (Vec3D){ 1.0f,-1.0f,-1.0f,1.0f };
+		case LIB3D_CUBE_SIDE_201: return (Vec3D){ 1.0f,-1.0f, 0.0f,1.0f };
+		case LIB3D_CUBE_SIDE_202: return (Vec3D){ 1.0f,-1.0f, 1.0f,1.0f };
+		case LIB3D_CUBE_SIDE_010: return (Vec3D){-1.0f, 0.0f,-1.0f,1.0f };
+		case LIB3D_CUBE_SIDE_011: return (Vec3D){-1.0f, 0.0f, 0.0f,1.0f };
+		case LIB3D_CUBE_SIDE_110: return (Vec3D){ 0.0f, 0.0f,-1.0f,1.0f };
+		case LIB3D_CUBE_SIDE_111: return (Vec3D){ 0.0f, 0.0f, 0.0f,1.0f };
+		case LIB3D_CUBE_SIDE_012: return (Vec3D){-1.0f, 0.0f, 1.0f,1.0f };
+		case LIB3D_CUBE_SIDE_112: return (Vec3D){ 0.0f, 0.0f, 1.0f,1.0f };
+		case LIB3D_CUBE_SIDE_210: return (Vec3D){ 1.0f, 0.0f,-1.0f,1.0f };
+		case LIB3D_CUBE_SIDE_211: return (Vec3D){ 1.0f, 0.0f, 0.0f,1.0f };
+		case LIB3D_CUBE_SIDE_212: return (Vec3D){ 1.0f, 0.0f, 1.0f,1.0f };
+		case LIB3D_CUBE_SIDE_020: return (Vec3D){-1.0f, 1.0f,-1.0f,1.0f };
+		case LIB3D_CUBE_SIDE_021: return (Vec3D){-1.0f, 1.0f, 0.0f,1.0f };
+		case LIB3D_CUBE_SIDE_120: return (Vec3D){ 0.0f, 1.0f,-1.0f,1.0f };
+		case LIB3D_CUBE_SIDE_121: return (Vec3D){ 0.0f, 1.0f, 0.0f,1.0f };
+		case LIB3D_CUBE_SIDE_022: return (Vec3D){-1.0f, 1.0f, 1.0f,1.0f };
+		case LIB3D_CUBE_SIDE_122: return (Vec3D){ 0.0f, 1.0f, 1.0f,1.0f };
+		case LIB3D_CUBE_SIDE_220: return (Vec3D){ 1.0f, 1.0f,-1.0f,1.0f };
+		case LIB3D_CUBE_SIDE_221: return (Vec3D){ 1.0f, 1.0f, 0.0f,1.0f };
+		case LIB3D_CUBE_SIDE_222: return (Vec3D){ 1.0f, 1.0f, 1.0f,1.0f };
 	}
-	return (vec3d){ 0.0f,0.0f,0.0f,1.0f };
+	return (Vec3D){ 0.0f,0.0f,0.0f,1.0f };
 }
 
-void Lib3D_Sides(Vector* trisOut,short sides,vec3d p,vec3d d,unsigned int c1,unsigned int c2){
-	triangle tris[12] = {
+void Lib3D_Sides(Vector* trisOut,short sides,Vec3D p,Vec3D d,unsigned int c1,unsigned int c2){
+	Tri3D tris[12] = {
 		// SOUTH
 		{ { { 0.0f, 0.0f, 0.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f },{ 1.0f, 1.0f, 0.0f, 1.0f } },{ 0.0f, 0.0f, 0.0f, 1.0f },c1 },
 		{ { { 0.0f, 0.0f, 0.0f, 1.0f },{ 1.0f, 1.0f, 0.0f, 1.0f },{ 1.0f, 0.0f, 0.0f, 1.0f } },{ 0.0f, 0.0f, 0.0f, 1.0f },c2 },
@@ -133,17 +133,17 @@ void Lib3D_Sides(Vector* trisOut,short sides,vec3d p,vec3d d,unsigned int c1,uns
 		if(sides & (1U << i)) continue;
 
 		for(int j = 0;j<3;j++)
-			tris[i].p[j] = vec3d_Add(p,vec3d_New(tris[i].p[j].x * d.x,tris[i].p[j].y * d.y,tris[i].p[j].z * d.z));
+			tris[i].p[j] = Vec3D_Add(p,Vec3D_New(tris[i].p[j].x * d.x,tris[i].p[j].y * d.y,tris[i].p[j].z * d.z));
 		
-		triangle_CalcNorm(&tris[i]);
+		Tri3D_CalcNorm(&tris[i]);
 		Vector_Push(trisOut,&tris[i]);
 	}
 }
-void Lib3D_Cube(Vector* trisOut,vec3d p,vec3d d,unsigned int c1,unsigned int c2){
+void Lib3D_Cube(Vector* trisOut,Vec3D p,Vec3D d,unsigned int c1,unsigned int c2){
 	Lib3D_Sides(trisOut,0,p,d,c1,c2);
 }
-Vector Lib3D_Cube_Make(vec3d p,vec3d d,unsigned int c1,unsigned int c2){
-	Vector trisOut = Vector_New(sizeof(triangle));
+Vector Lib3D_Cube_Make(Vec3D p,Vec3D d,unsigned int c1,unsigned int c2){
+	Vector trisOut = Vector_New(sizeof(Tri3D));
 	Lib3D_Cube(&trisOut,p,d,c1,c2);
 	return trisOut;
 }

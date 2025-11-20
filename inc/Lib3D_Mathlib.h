@@ -4,224 +4,224 @@
 #include "/home/codeleaded/System/Static/Container/Vector.h"
 #include "/home/codeleaded/System/Static/Library/Vector2.h"
 
-typedef struct vec2d{
+typedef struct Vec2D{
 	float u;
 	float v;
 	float w;
-} vec2d;
+} Vec2D;
 
-typedef struct vec3d{
+typedef struct Vec3D{
 	float x;
 	float y;
 	float z;
 	float w;
-} vec3d;
+} Vec3D;
 
-vec3d vec3d_New(float x,float y,float z){
-	return (vec3d){ x,y,z,1.0f };
+Vec3D Vec3D_New(float x,float y,float z){
+	return (Vec3D){ x,y,z,1.0f };
 }
-vec3d vec3d_Null(){
-	return (vec3d){ 0.0f,0.0f,0.0f,1.0f };
+Vec3D Vec3D_Null(){
+	return (Vec3D){ 0.0f,0.0f,0.0f,1.0f };
 }
-vec3d vec3d_Add(vec3d v1, vec3d v2){
-	return vec3d_New( v1.x + v2.x, v1.y + v2.y, v1.z + v2.z );
+Vec3D Vec3D_Add(Vec3D v1, Vec3D v2){
+	return Vec3D_New( v1.x + v2.x, v1.y + v2.y, v1.z + v2.z );
 }
-vec3d vec3d_Sub(vec3d v1, vec3d v2){
-	return vec3d_New( v1.x - v2.x, v1.y - v2.y, v1.z - v2.z );
+Vec3D Vec3D_Sub(Vec3D v1, Vec3D v2){
+	return Vec3D_New( v1.x - v2.x, v1.y - v2.y, v1.z - v2.z );
 }
-vec3d vec3d_Mul(vec3d v1, float k){
-	return vec3d_New( v1.x * k, v1.y * k, v1.z * k );
+Vec3D Vec3D_Mul(Vec3D v1, float k){
+	return Vec3D_New( v1.x * k, v1.y * k, v1.z * k );
 }
-vec3d vec3d_Div(vec3d v1, float k){
-	if(k==0.0f) return vec3d_New( 0.0f,0.0f,0.0f );
-	return vec3d_New( v1.x / k, v1.y / k, v1.z / k );
+Vec3D Vec3D_Div(Vec3D v1, float k){
+	if(k==0.0f) return Vec3D_New( 0.0f,0.0f,0.0f );
+	return Vec3D_New( v1.x / k, v1.y / k, v1.z / k );
 }
-float vec3d_DotProduct(vec3d v1, vec3d v2){
+float Vec3D_DotProduct(Vec3D v1, Vec3D v2){
 	return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
 }
-float vec3d_Length(vec3d v){
-	return sqrtf(vec3d_DotProduct(v, v));
+float Vec3D_Length(Vec3D v){
+	return sqrtf(Vec3D_DotProduct(v, v));
 }
-vec3d vec3d_Normalise(vec3d v){
-	float l = vec3d_Length(v);
-	return vec3d_New( v.x / l, v.y / l, v.z / l );
+Vec3D Vec3D_Normalise(Vec3D v){
+	float l = Vec3D_Length(v);
+	return Vec3D_New( v.x / l, v.y / l, v.z / l );
 }
-vec3d vec3d_Perp(vec3d v){
-	return vec3d_New( -v.z, v.y, v.x );
+Vec3D Vec3D_Perp(Vec3D v){
+	return Vec3D_New( -v.z, v.y, v.x );
 }
-vec3d vec3d_Round(vec3d v){
-	return vec3d_New( roundf(v.x),roundf(v.y),roundf(v.z) );
+Vec3D Vec3D_Round(Vec3D v){
+	return Vec3D_New( roundf(v.x),roundf(v.y),roundf(v.z) );
 }
-vec3d vec3d_CrossProduct(vec3d v1, vec3d v2){
-	vec3d v = vec3d_New(0.0f,0.0f,0.0f);
+Vec3D Vec3D_CrossProduct(Vec3D v1, Vec3D v2){
+	Vec3D v = Vec3D_New(0.0f,0.0f,0.0f);
 	v.x = v1.y * v2.z - v1.z * v2.y;
 	v.y = v1.z * v2.x - v1.x * v2.z;
 	v.z = v1.x * v2.y - v1.y * v2.x;
 	return v;
 }
-vec3d vec3d_IntersectPlane(vec3d plane_p, vec3d* plane_n, vec3d lineStart, vec3d lineEnd){
-	*plane_n = vec3d_Normalise(*plane_n);
-	float plane_d = -vec3d_DotProduct(*plane_n, plane_p);
-	float ad = vec3d_DotProduct(lineStart, *plane_n);
-	float bd = vec3d_DotProduct(lineEnd, *plane_n);
+Vec3D Vec3D_IntersectPlane(Vec3D plane_p, Vec3D* plane_n, Vec3D lineStart, Vec3D lineEnd){
+	*plane_n = Vec3D_Normalise(*plane_n);
+	float plane_d = -Vec3D_DotProduct(*plane_n, plane_p);
+	float ad = Vec3D_DotProduct(lineStart, *plane_n);
+	float bd = Vec3D_DotProduct(lineEnd, *plane_n);
 	float t = (-plane_d - ad) / (bd - ad);
-	vec3d lineStartToEnd = vec3d_Sub(lineEnd, lineStart);
-	vec3d lineToIntersect = vec3d_Mul(lineStartToEnd, t);
-	return vec3d_Add(lineStart, lineToIntersect);
+	Vec3D lineStartToEnd = Vec3D_Sub(lineEnd, lineStart);
+	Vec3D lineToIntersect = Vec3D_Mul(lineStartToEnd, t);
+	return Vec3D_Add(lineStart, lineToIntersect);
 }
-float vec3d_Dist(vec3d plane_p, vec3d plane_n,vec3d p){
-	//vec3d n = vec3d_Normalise(p);
-	return (plane_n.x * p.x + plane_n.y * p.y + plane_n.z * p.z - vec3d_DotProduct(plane_n, plane_p));
+float Vec3D_Dist(Vec3D plane_p, Vec3D plane_n,Vec3D p){
+	//Vec3D n = Vec3D_Normalise(p);
+	return (plane_n.x * p.x + plane_n.y * p.y + plane_n.z * p.z - Vec3D_DotProduct(plane_n, plane_p));
 }
 
 
-typedef struct triangle{
-	vec3d p[3];
-	vec3d n;
+typedef struct Tri3D{
+	Vec3D p[3];
+	Vec3D n;
 	unsigned int c;
-} triangle;
+} Tri3D;
 
-void triangle_CalcNorm(triangle* t){
-	vec3d line1 = vec3d_Sub(t->p[1],t->p[0]);
-	vec3d line2 = vec3d_Sub(t->p[2],t->p[0]);
-	vec3d normal = vec3d_CrossProduct(line1,line2);
+void Tri3D_CalcNorm(Tri3D* t){
+	Vec3D line1 = Vec3D_Sub(t->p[1],t->p[0]);
+	Vec3D line2 = Vec3D_Sub(t->p[2],t->p[0]);
+	Vec3D normal = Vec3D_CrossProduct(line1,line2);
 
-	t->n = vec3d_Normalise(normal);
+	t->n = Vec3D_Normalise(normal);
 }
-void triangle_ShadeNorm(triangle* t,vec3d dirLight){
-	float l = F32_Min(F32_Max(0.2f,vec3d_DotProduct(t->n,dirLight)),1.0f);
+void Tri3D_ShadeNorm(Tri3D* t,Vec3D dirLight){
+	float l = F32_Min(F32_Max(0.2f,Vec3D_DotProduct(t->n,dirLight)),1.0f);
 	t->c = Pixel_Mulf(t->c,l);
 }
-void triangle_Scale(triangle* t,float s){
-	t->p[0] = vec3d_Mul(t->p[0],s);
-	t->p[1] = vec3d_Mul(t->p[1],s);
-	t->p[2] = vec3d_Mul(t->p[2],s);
+void Tri3D_Scale(Tri3D* t,float s){
+	t->p[0] = Vec3D_Mul(t->p[0],s);
+	t->p[1] = Vec3D_Mul(t->p[1],s);
+	t->p[2] = Vec3D_Mul(t->p[2],s);
 }
-void triangle_Offset(triangle* t,vec3d offset){
-	t->p[0] = vec3d_Add(t->p[0],offset);
-	t->p[1] = vec3d_Add(t->p[1],offset);
-	t->p[2] = vec3d_Add(t->p[2],offset);
+void Tri3D_Offset(Tri3D* t,Vec3D offset){
+	t->p[0] = Vec3D_Add(t->p[0],offset);
+	t->p[1] = Vec3D_Add(t->p[1],offset);
+	t->p[2] = Vec3D_Add(t->p[2],offset);
 }
-int triangle_ClipAgainstPlane(vec3d plane_p, vec3d plane_n, triangle in_tri, triangle* out_tri1, triangle* out_tri2){
+int Tri3D_ClipAgainstPlane(Vec3D plane_p, Vec3D plane_n, Tri3D in_tri, Tri3D* out_tri1, Tri3D* out_tri2){
 	// Make sure plane normal is indeed normal
-	plane_n = vec3d_Normalise(plane_n);
+	plane_n = Vec3D_Normalise(plane_n);
 	
 	// Create two temporary storage arrays to classify points either side of plane
 	// If distance sign is positive, point lies on "inside" of plane
-	vec3d* inCUBE_SIDE_points[3];  int nInsidePointCount = 0;
-	vec3d* outCUBE_SIDE_points[3]; int nOutsidePointCount = 0;
-	// Get signed distance of each point in triangle to plane
-	float d0 = vec3d_Dist(plane_p,plane_n,in_tri.p[0]);
-	float d1 = vec3d_Dist(plane_p,plane_n,in_tri.p[1]);
-	float d2 = vec3d_Dist(plane_p,plane_n,in_tri.p[2]);
+	Vec3D* inCUBE_SIDE_points[3];  int nInsidePointCount = 0;
+	Vec3D* outCUBE_SIDE_points[3]; int nOutsidePointCount = 0;
+	// Get signed distance of each point in Tri3D to plane
+	float d0 = Vec3D_Dist(plane_p,plane_n,in_tri.p[0]);
+	float d1 = Vec3D_Dist(plane_p,plane_n,in_tri.p[1]);
+	float d2 = Vec3D_Dist(plane_p,plane_n,in_tri.p[2]);
 	if (d0 >= 0) { inCUBE_SIDE_points[nInsidePointCount++] = &in_tri.p[0]; }
 	else { outCUBE_SIDE_points[nOutsidePointCount++] = &in_tri.p[0]; }
 	if (d1 >= 0) { inCUBE_SIDE_points[nInsidePointCount++] = &in_tri.p[1]; }
 	else { outCUBE_SIDE_points[nOutsidePointCount++] = &in_tri.p[1]; }
 	if (d2 >= 0) { inCUBE_SIDE_points[nInsidePointCount++] = &in_tri.p[2]; }
 	else { outCUBE_SIDE_points[nOutsidePointCount++] = &in_tri.p[2]; }
-	// Now classify triangle points, and break the input triangle into 
-	// smaller output triangles if required. There are four possible
+	// Now classify Tri3D points, and break the input Tri3D into 
+	// smaller output Tri3Ds if required. There are four possible
 	// outcomes...
 	if (nInsidePointCount == 0)
 	{
-		// All points lie on the outside of plane, so clip whole triangle
+		// All points lie on the outside of plane, so clip whole Tri3D
 		// It ceases to exist
-		return 0; // No returned triangles are valid
+		return 0; // No returned Tri3Ds are valid
 	}
 	if (nInsidePointCount == 3)
 	{
 		// All points lie on the inside of plane, so do nothing
-		// and allow the triangle to simply pass through
+		// and allow the Tri3D to simply pass through
 		*out_tri1 = in_tri;
-		return 1; // Just the one returned original triangle is valid
+		return 1; // Just the one returned original Tri3D is valid
 	}
 	if (nInsidePointCount == 1 && nOutsidePointCount == 2)
 	{
-		// triangle should be clipped. As two points lie outside
-		// the plane, the triangle simply becomes a smaller triangle
-		// Copy appearance info to new triangle
+		// Tri3D should be clipped. As two points lie outside
+		// the plane, the Tri3D simply becomes a smaller Tri3D
+		// Copy appearance info to new Tri3D
 		out_tri1->c =  in_tri.c;
 		// The inside point is valid, so keep that...
 		out_tri1->p[0] = *inCUBE_SIDE_points[0];
 		// but the two new points are at the locations where the 
-		// original sides of the triangle (lines) intersect with the plane
-		out_tri1->p[1] = vec3d_IntersectPlane(plane_p, &plane_n, *inCUBE_SIDE_points[0], *outCUBE_SIDE_points[0]);
-		out_tri1->p[2] = vec3d_IntersectPlane(plane_p, &plane_n, *inCUBE_SIDE_points[0], *outCUBE_SIDE_points[1]);
-		return 1; // Return the newly formed single triangle
+		// original sides of the Tri3D (lines) intersect with the plane
+		out_tri1->p[1] = Vec3D_IntersectPlane(plane_p, &plane_n, *inCUBE_SIDE_points[0], *outCUBE_SIDE_points[0]);
+		out_tri1->p[2] = Vec3D_IntersectPlane(plane_p, &plane_n, *inCUBE_SIDE_points[0], *outCUBE_SIDE_points[1]);
+		return 1; // Return the newly formed single Tri3D
 	}
 	if (nInsidePointCount == 2 && nOutsidePointCount == 1)
 	{
-		// triangle should be clipped. As two points lie inside the plane,
-		// the clipped triangle becomes a "quad". Fortunately, we can
-		// represent a quad with two new triangles
-		// Copy appearance info to new triangles
+		// Tri3D should be clipped. As two points lie inside the plane,
+		// the clipped Tri3D becomes a "quad". Fortunately, we can
+		// represent a quad with two new Tri3Ds
+		// Copy appearance info to new Tri3Ds
 		out_tri1->c =  in_tri.c;
 		out_tri2->c =  in_tri.c;
-		// The first triangle consists of the two inside points and a new
-		// point determined by the location where one side of the triangle
+		// The first Tri3D consists of the two inside points and a new
+		// point determined by the location where one side of the Tri3D
 		// intersects with the plane
 		out_tri1->p[0] = *inCUBE_SIDE_points[0];
 		out_tri1->p[1] = *inCUBE_SIDE_points[1];
-		out_tri1->p[2] = vec3d_IntersectPlane(plane_p, &plane_n, *inCUBE_SIDE_points[0], *outCUBE_SIDE_points[0]);
-		// The second triangle is composed of one of he inside points, a
+		out_tri1->p[2] = Vec3D_IntersectPlane(plane_p, &plane_n, *inCUBE_SIDE_points[0], *outCUBE_SIDE_points[0]);
+		// The second Tri3D is composed of one of he inside points, a
 		// new point determined by the intersection of the other side of the 
-		// triangle and the plane, and the newly created point above
+		// Tri3D and the plane, and the newly created point above
 		out_tri2->p[0] = *inCUBE_SIDE_points[1];
 		out_tri2->p[1] = out_tri1->p[2];
-		out_tri2->p[2] = vec3d_IntersectPlane(plane_p, &plane_n, *inCUBE_SIDE_points[1], *outCUBE_SIDE_points[0]);
-		return 2; // Return two newly formed triangles which form a quad
+		out_tri2->p[2] = Vec3D_IntersectPlane(plane_p, &plane_n, *inCUBE_SIDE_points[1], *outCUBE_SIDE_points[0]);
+		return 2; // Return two newly formed Tri3Ds which form a quad
 	}
 	return -1;
 }
 
 
-typedef struct mat4x4{
+typedef struct M4x4D{
 	float m[4][4];
-} mat4x4;
+} M4x4D;
 
-mat4x4 Matrix_Null(){
-	return (mat4x4){{
+M4x4D Matrix_Null(){
+	return (M4x4D){{
 		{ 0.0f,0.0f,0.0f,0.0f },
 		{ 0.0f,0.0f,0.0f,0.0f },
 		{ 0.0f,0.0f,0.0f,0.0f },
 		{ 0.0f,0.0f,0.0f,0.0f }
 	}};
 }
-vec3d Matrix_MultiplyVector(mat4x4 m, vec3d i){
-	vec3d v;
+Vec3D Matrix_MultiplyVector(M4x4D m, Vec3D i){
+	Vec3D v;
 	v.x = i.x * m.m[0][0] + i.y * m.m[1][0] + i.z * m.m[2][0] + i.w * m.m[3][0];
 	v.y = i.x * m.m[0][1] + i.y * m.m[1][1] + i.z * m.m[2][1] + i.w * m.m[3][1];
 	v.z = i.x * m.m[0][2] + i.y * m.m[1][2] + i.z * m.m[2][2] + i.w * m.m[3][2];
 	v.w = i.x * m.m[0][3] + i.y * m.m[1][3] + i.z * m.m[2][3] + i.w * m.m[3][3];
 	return v;
 }
-mat4x4 Matrix_MultiplyMatrix(mat4x4 m1, mat4x4 m2){
-	mat4x4 matrix = Matrix_Null();
+M4x4D Matrix_MultiplyMatrix(M4x4D m1, M4x4D m2){
+	M4x4D matrix = Matrix_Null();
 	for (int c = 0; c < 4; c++)
 		for (int r = 0; r < 4; r++)
 			matrix.m[r][c] = m1.m[r][0] * m2.m[0][c] + m1.m[r][1] * m2.m[1][c] + m1.m[r][2] * m2.m[2][c] + m1.m[r][3] * m2.m[3][c];
 	return matrix;
 }
-mat4x4 Matrix_PointAt(vec3d pos, vec3d target, vec3d up){
-	vec3d newForward = vec3d_Sub(target, pos);
-	newForward = vec3d_Normalise(newForward);
+M4x4D Matrix_PointAt(Vec3D pos, Vec3D target, Vec3D up){
+	Vec3D newForward = Vec3D_Sub(target, pos);
+	newForward = Vec3D_Normalise(newForward);
 	
-	vec3d a = vec3d_Mul(newForward,vec3d_DotProduct(up,newForward));
-	vec3d newUp = vec3d_Sub(up, a);
-	newUp = vec3d_Normalise(newUp);
+	Vec3D a = Vec3D_Mul(newForward,Vec3D_DotProduct(up,newForward));
+	Vec3D newUp = Vec3D_Sub(up, a);
+	newUp = Vec3D_Normalise(newUp);
 
-	vec3d newRight = vec3d_CrossProduct(newUp,newForward);
+	Vec3D newRight = Vec3D_CrossProduct(newUp,newForward);
 
-	return (mat4x4){{
+	return (M4x4D){{
 		{ newRight.x,	newRight.y,		newRight.z,		0.0f },
 		{ newUp.x,		newUp.y,		newUp.z,		0.0f },
 		{ newForward.x,	newForward.y,	newForward.z,	0.0f },
 		{ pos.x,		pos.y,			pos.z,			1.0f }
 	}};
 }
-mat4x4 Matrix_QuickInverse(mat4x4 m){
-	mat4x4 matrix = Matrix_Null();
+M4x4D Matrix_QuickInverse(M4x4D m){
+	M4x4D matrix = Matrix_Null();
 	matrix.m[0][0] = m.m[0][0]; matrix.m[0][1] = m.m[1][0]; matrix.m[0][2] = m.m[2][0]; matrix.m[0][3] = 0.0f;
 	matrix.m[1][0] = m.m[0][1]; matrix.m[1][1] = m.m[1][1]; matrix.m[1][2] = m.m[2][1]; matrix.m[1][3] = 0.0f;
 	matrix.m[2][0] = m.m[0][2]; matrix.m[2][1] = m.m[1][2]; matrix.m[2][2] = m.m[2][2]; matrix.m[2][3] = 0.0f;
@@ -231,137 +231,137 @@ mat4x4 Matrix_QuickInverse(mat4x4 m){
 	matrix.m[3][3] = 1.0f;
 	return matrix;
 }
-mat4x4 Matrix_MakeView(vec3d pos,vec3d target,vec3d up){
-	vec3d newForward = vec3d_Normalise(vec3d_Sub(target, pos));
-	vec3d a = vec3d_Mul(newForward,vec3d_DotProduct(up,newForward));
-	vec3d newUp = vec3d_Normalise(vec3d_Sub(up, a));
-	vec3d newRight = vec3d_CrossProduct(newUp,newForward);
+M4x4D Matrix_MakeView(Vec3D pos,Vec3D target,Vec3D up){
+	Vec3D newForward = Vec3D_Normalise(Vec3D_Sub(target, pos));
+	Vec3D a = Vec3D_Mul(newForward,Vec3D_DotProduct(up,newForward));
+	Vec3D newUp = Vec3D_Normalise(Vec3D_Sub(up, a));
+	Vec3D newRight = Vec3D_CrossProduct(newUp,newForward);
 
-	return (mat4x4){{
+	return (M4x4D){{
 		{ newRight.x,						newUp.x,						newForward.x,						0.0f },
 		{ newRight.y,						newUp.y,						newForward.y,						0.0f },
 		{ newRight.z,						newUp.z,						newForward.z,						0.0f },
-		{ -vec3d_DotProduct(newRight,pos),	-vec3d_DotProduct(newUp,pos),	-vec3d_DotProduct(newForward,pos),	1.0f }
+		{ -Vec3D_DotProduct(newRight,pos),	-Vec3D_DotProduct(newUp,pos),	-Vec3D_DotProduct(newForward,pos),	1.0f }
 	}};
 }
 
-mat4x4 Matrix_MakeIdentity(){
-	return (mat4x4){{
+M4x4D Matrix_MakeIdentity(){
+	return (M4x4D){{
 		{ 1.0f,0.0f,0.0f,0.0f },
 		{ 0.0f,1.0f,0.0f,0.0f },
 		{ 0.0f,0.0f,1.0f,0.0f },
 		{ 0.0f,0.0f,0.0f,1.0f }
 	}};
 }
-mat4x4 Matrix_MakeRotationX(float fAngleRad){
-	return (mat4x4){{
+M4x4D Matrix_MakeRotationX(float fAngleRad){
+	return (M4x4D){{
 		{ 1.0f,0.0f,			0.0f,			0.0f },
 		{ 0.0f,cosf(fAngleRad),	sinf(fAngleRad),0.0f },
 		{ 0.0f,-sinf(fAngleRad),cosf(fAngleRad),0.0f },
 		{ 0.0f,0.0f,			0.0f,			1.0f }
 	}};
 }
-mat4x4 Matrix_MakeRotationY(float fAngleRad){
-	return (mat4x4){{
+M4x4D Matrix_MakeRotationY(float fAngleRad){
+	return (M4x4D){{
 		{ cosf(fAngleRad),	0.0f,sinf(fAngleRad),	0.0f },
 		{ 0.0f,				1.0f,0.0f,				0.0f },
 		{ -sinf(fAngleRad),	0.0f,cosf(fAngleRad),	0.0f },
 		{ 0.0f,				0.0f,0.0f,				1.0f }
 	}};
 }
-mat4x4 Matrix_MakeRotationZ(float fAngleRad){
-	return (mat4x4){{
+M4x4D Matrix_MakeRotationZ(float fAngleRad){
+	return (M4x4D){{
 		{ cosf(fAngleRad),	sinf(fAngleRad),0.0f,0.0f },
 		{ -sinf(fAngleRad),	cosf(fAngleRad),0.0f,0.0f },
 		{ 0.0f,				0.0f,			1.0f,0.0f },
 		{ 0.0f,				0.0f,			0.0f,1.0f }
 	}};
 }
-mat4x4 Matrix_MakeTranslation(float x, float y, float z){
-	return (mat4x4){{
+M4x4D Matrix_MakeTranslation(float x, float y, float z){
+	return (M4x4D){{
 		{ 1.0f,	0.0f,	0.0f,	0.0f },
 		{ 0.0f,	1.0f,	0.0f,	0.0f },
 		{ 0.0f,	0.0f,	1.0f,	0.0f },
 		{ x,	y,		z,		1.0f }
 	}};
 }
-mat4x4 Matrix_MakeProjection(float fFovDegrees, float fAspectRatio, float fNear, float fFar){
+M4x4D Matrix_MakeProjection(float fFovDegrees, float fAspectRatio, float fNear, float fFar){
 	const float fFovRad = 1.0f / tanf(fFovDegrees * 0.5f / 180.0f * 3.14159f);
-	return (mat4x4){{
+	return (M4x4D){{
 		{ fAspectRatio * fFovRad,	0.0f,	0.0f,								0.0f },
 		{ 0.0f,						fFovRad,0.0f,								0.0f },
 		{ 0.0f,						0.0f,	fFar / (fFar - fNear),				1.0f },
 		{ 0.0f,						0.0f,	(-fFar * fNear) / (fFar - fNear),	0.0f }
 	}};
 }
-mat4x4 Matrix_MakeWorld(vec3d origin,vec3d angle){
-	const mat4x4 matRotX = Matrix_MakeRotationX(angle.x);
-	const mat4x4 matRotY = Matrix_MakeRotationY(angle.y);
-	const mat4x4 matRotZ = Matrix_MakeRotationZ(angle.z);
-	const mat4x4 matTrans = Matrix_MakeTranslation(origin.x,origin.y,origin.z);
-	const mat4x4 matWorld1 = Matrix_MultiplyMatrix(matTrans,matRotY);
-	const mat4x4 matWorld2 = Matrix_MultiplyMatrix(matRotX,matRotZ);
-	const mat4x4 matWorld = Matrix_MultiplyMatrix(matWorld1,matWorld2);
+M4x4D Matrix_MakeWorld(Vec3D origin,Vec3D angle){
+	const M4x4D matRotX = Matrix_MakeRotationX(angle.x);
+	const M4x4D matRotY = Matrix_MakeRotationY(angle.y);
+	const M4x4D matRotZ = Matrix_MakeRotationZ(angle.z);
+	const M4x4D matTrans = Matrix_MakeTranslation(origin.x,origin.y,origin.z);
+	const M4x4D matWorld1 = Matrix_MultiplyMatrix(matTrans,matRotY);
+	const M4x4D matWorld2 = Matrix_MultiplyMatrix(matRotX,matRotZ);
+	const M4x4D matWorld = Matrix_MultiplyMatrix(matWorld1,matWorld2);
 	return matWorld;
 }
-mat4x4 Matrix_MakeWorldR(vec3d origin,vec3d angle){
-	const mat4x4 matRotX = Matrix_MakeRotationX(angle.x);
-	const mat4x4 matRotY = Matrix_MakeRotationY(angle.y);
-	const mat4x4 matRotZ = Matrix_MakeRotationZ(angle.z);
-	const mat4x4 matTrans = Matrix_MakeTranslation(origin.x,origin.y,origin.z);
-	const mat4x4 matWorld1 = Matrix_MultiplyMatrix(matRotY,matRotZ);
-	const mat4x4 matWorld2 = Matrix_MultiplyMatrix(matRotX,matTrans);
-	const mat4x4 matWorld = Matrix_MultiplyMatrix(matWorld1,matWorld2);
+M4x4D Matrix_MakeWorldR(Vec3D origin,Vec3D angle){
+	const M4x4D matRotX = Matrix_MakeRotationX(angle.x);
+	const M4x4D matRotY = Matrix_MakeRotationY(angle.y);
+	const M4x4D matRotZ = Matrix_MakeRotationZ(angle.z);
+	const M4x4D matTrans = Matrix_MakeTranslation(origin.x,origin.y,origin.z);
+	const M4x4D matWorld1 = Matrix_MultiplyMatrix(matRotY,matRotZ);
+	const M4x4D matWorld2 = Matrix_MultiplyMatrix(matRotX,matTrans);
+	const M4x4D matWorld = Matrix_MultiplyMatrix(matWorld1,matWorld2);
 	return matWorld;
 }
-mat4x4 Matrix_MakePerspektive(vec3d pos,vec3d up,vec3d a){
-	const mat4x4 matCameraRotX = Matrix_MakeRotationX(a.x);
-	const mat4x4 matCameraRotY = Matrix_MakeRotationY(a.y);
-	const mat4x4 matCameraRotZ = Matrix_MakeRotationZ(a.z);
+M4x4D Matrix_MakePerspektive(Vec3D pos,Vec3D up,Vec3D a){
+	const M4x4D matCameraRotX = Matrix_MakeRotationX(a.x);
+	const M4x4D matCameraRotY = Matrix_MakeRotationY(a.y);
+	const M4x4D matCameraRotZ = Matrix_MakeRotationZ(a.z);
 	
-	vec3d lookdir = vec3d_New(0.0f,0.0f,1.0f);
+	Vec3D lookdir = Vec3D_New(0.0f,0.0f,1.0f);
 	lookdir = Matrix_MultiplyVector(matCameraRotX,lookdir);
 	lookdir = Matrix_MultiplyVector(matCameraRotY,lookdir);
 	lookdir = Matrix_MultiplyVector(matCameraRotZ,lookdir);
 	
-	const vec3d target = vec3d_Add(pos,lookdir);
-	//const mat4x4 matCamera = Matrix_PointAt(pos,target,up);
-	//const mat4x4 matView = Matrix_QuickInverse(matCamera);
-	const mat4x4 matView = Matrix_MakeView(pos,target,up);
+	const Vec3D target = Vec3D_Add(pos,lookdir);
+	//const M4x4D matCamera = Matrix_PointAt(pos,target,up);
+	//const M4x4D matView = Matrix_QuickInverse(matCamera);
+	const M4x4D matView = Matrix_MakeView(pos,target,up);
 	return matView;
 }
 
 typedef struct Camera {
-	vec3d p;
-	vec3d d;
-	vec3d v;
-	vec3d up;
-	vec3d ld;
-	vec3d sd;
-	vec3d a;
+	Vec3D p;
+	Vec3D d;
+	Vec3D v;
+	Vec3D up;
+	Vec3D ld;
+	Vec3D sd;
+	Vec3D a;
 	float fov;
 } Camera;
 
 Camera Camera_New(){
 	Camera c;
-	c.p = (vec3d){ 0.0f,0.0f,0.0f,1.0f };
-	c.d = (vec3d){ 0.0f,0.0f,0.0f,1.0f };
-	c.v = (vec3d){ 0.0f,0.0f,0.0f,1.0f };
-	c.up = (vec3d){ 0.0f,1.0f,0.0f,1.0f };
-	c.ld = (vec3d){ 0.0f,0.0f,1.0f,1.0f };
-	c.ld = (vec3d){ 1.0f,0.0f,0.0f,1.0f };
-	c.a = (vec3d){ 0.0f,0.0f,0.0f,1.0f };
+	c.p = (Vec3D){ 0.0f,0.0f,0.0f,1.0f };
+	c.d = (Vec3D){ 0.0f,0.0f,0.0f,1.0f };
+	c.v = (Vec3D){ 0.0f,0.0f,0.0f,1.0f };
+	c.up = (Vec3D){ 0.0f,1.0f,0.0f,1.0f };
+	c.ld = (Vec3D){ 0.0f,0.0f,1.0f,1.0f };
+	c.ld = (Vec3D){ 1.0f,0.0f,0.0f,1.0f };
+	c.a = (Vec3D){ 0.0f,0.0f,0.0f,1.0f };
 	c.fov = 90;
 	return c;
 }
-Camera Camera_Make(vec3d p,vec3d d,vec3d a,float fov){
+Camera Camera_Make(Vec3D p,Vec3D d,Vec3D a,float fov){
 	Camera c;
 	c.p = p;
 	c.d = d;
-	c.v = (vec3d){ 0.0f,0.0f,0.0f,1.0f };
-	c.up = (vec3d){ 0.0f,1.0f,0.0f,1.0f };
-	c.ld = (vec3d){ 0.0f,0.0f,1.0f,1.0f };
-	c.sd = (vec3d){ 1.0f,0.0f,0.0f,1.0f };
+	c.v = (Vec3D){ 0.0f,0.0f,0.0f,1.0f };
+	c.up = (Vec3D){ 0.0f,1.0f,0.0f,1.0f };
+	c.ld = (Vec3D){ 0.0f,0.0f,1.0f,1.0f };
+	c.sd = (Vec3D){ 1.0f,0.0f,0.0f,1.0f };
 	c.a = a;
 	c.fov = fov;
 	return c;
@@ -370,11 +370,11 @@ void Camera_Update(Camera* c){
 	if(c->a.x < -3.14159f * 0.5f + 0.01f) c->a.x = -3.14159f * 0.5f + 0.01f;
 	if(c->a.x >  3.14159f * 0.5f - 0.01f) c->a.x =  3.14159f * 0.5f - 0.01f;
 	
-	mat4x4 matCameraRotY = Matrix_MakeRotationY(c->a.y);
-	//mat4x4 matCameraRotX = Matrix_MakeRotationX(c->a.x);
+	M4x4D matCameraRotY = Matrix_MakeRotationY(c->a.y);
+	//M4x4D matCameraRotX = Matrix_MakeRotationX(c->a.x);
 	
-	vec3d lookdir = vec3d_New(0.0f,0.0f,1.0f);
-	vec3d sidedir = vec3d_New(1.0f,0.0f,0.0f);
+	Vec3D lookdir = Vec3D_New(0.0f,0.0f,1.0f);
+	Vec3D sidedir = Vec3D_New(1.0f,0.0f,0.0f);
 	//lookdir = Matrix_MultiplyVector(matCameraRotX,lookdir);
 	lookdir = Matrix_MultiplyVector(matCameraRotY,lookdir);
 	//sidedir = Matrix_MultiplyVector(matCameraRotX,sidedir);
