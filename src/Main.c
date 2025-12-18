@@ -30,7 +30,6 @@ void Setup(AlxWindow* w){
 	cam = Camera_Make(
 		(Vec3D){ 0.0f,0.0f,-3.0f,1.0f },
 		(Vec3D){ 0.0f,0.0f,0.0f,1.0f },
-		(Vec3D){ 0.0f,0.0f,0.0f,1.0f },
 		90.0f
 	);
 

@@ -3,6 +3,7 @@
 
 #include "/home/codeleaded/System/Static/Container/Vector.h"
 #include "/home/codeleaded/System/Static/Library/Vector2.h"
+#include "/home/codeleaded/System/Static/Library/Pixel.h"
 
 typedef struct Vec2D{
 	float u;
@@ -96,6 +97,11 @@ void Tri3D_Scale(Tri3D* t,float s){
 	t->p[0] = Vec3D_Mul(t->p[0],s);
 	t->p[1] = Vec3D_Mul(t->p[1],s);
 	t->p[2] = Vec3D_Mul(t->p[2],s);
+}
+void Tri3D_Mul(Tri3D* t,Vec3D scale){
+	t->p[0] = (Vec3D){ t->p[0].x * scale.x,t->p[0].y * scale.y,t->p[0].z * scale.z };
+	t->p[1] = (Vec3D){ t->p[1].x * scale.x,t->p[1].y * scale.y,t->p[1].z * scale.z };
+	t->p[2] = (Vec3D){ t->p[2].x * scale.x,t->p[2].y * scale.y,t->p[2].z * scale.z };
 }
 void Tri3D_Offset(Tri3D* t,Vec3D offset){
 	t->p[0] = Vec3D_Add(t->p[0],offset);
@@ -277,7 +283,7 @@ M4x4D Matrix_MakeRotationZ(float fAngleRad){
 		{ 0.0f,				0.0f,			0.0f,1.0f }
 	}};
 }
-M4x4D Matrix_MakeTranslation(float x, float y, float z){
+M4x4D Matrix_MakeTranslation(float x,float y,float z){
 	return (M4x4D){{
 		{ 1.0f,	0.0f,	0.0f,	0.0f },
 		{ 0.0f,	1.0f,	0.0f,	0.0f },
@@ -285,7 +291,7 @@ M4x4D Matrix_MakeTranslation(float x, float y, float z){
 		{ x,	y,		z,		1.0f }
 	}};
 }
-M4x4D Matrix_MakeProjection(float fFovDegrees, float fAspectRatio, float fNear, float fFar){
+M4x4D Matrix_MakeProjection(float fFovDegrees,float fAspectRatio,float fNear,float fFar){
 	const float fFovRad = 1.0f / tanf(fFovDegrees * 0.5f / 180.0f * 3.14159f);
 	return (M4x4D){{
 		{ fAspectRatio * fFovRad,	0.0f,	0.0f,								0.0f },
@@ -331,10 +337,9 @@ M4x4D Matrix_MakePerspektive(Vec3D pos,Vec3D up,Vec3D a){
 	return matView;
 }
 
+
 typedef struct Camera {
 	Vec3D p;
-	Vec3D d;
-	Vec3D v;
 	Vec3D up;
 	Vec3D ld;
 	Vec3D sd;
@@ -345,23 +350,16 @@ typedef struct Camera {
 Camera Camera_New(){
 	Camera c;
 	c.p = (Vec3D){ 0.0f,0.0f,0.0f,1.0f };
-	c.d = (Vec3D){ 0.0f,0.0f,0.0f,1.0f };
-	c.v = (Vec3D){ 0.0f,0.0f,0.0f,1.0f };
-	c.up = (Vec3D){ 0.0f,1.0f,0.0f,1.0f };
-	c.ld = (Vec3D){ 0.0f,0.0f,1.0f,1.0f };
-	c.ld = (Vec3D){ 1.0f,0.0f,0.0f,1.0f };
-	c.a = (Vec3D){ 0.0f,0.0f,0.0f,1.0f };
-	c.fov = 90;
-	return c;
-}
-Camera Camera_Make(Vec3D p,Vec3D d,Vec3D a,float fov){
-	Camera c;
-	c.p = p;
-	c.d = d;
-	c.v = (Vec3D){ 0.0f,0.0f,0.0f,1.0f };
 	c.up = (Vec3D){ 0.0f,1.0f,0.0f,1.0f };
 	c.ld = (Vec3D){ 0.0f,0.0f,1.0f,1.0f };
 	c.sd = (Vec3D){ 1.0f,0.0f,0.0f,1.0f };
+	c.a = (Vec3D){ 0.0f,0.0f,0.0f,1.0f };
+	c.fov = 90.0f;
+	return c;
+}
+Camera Camera_Make(Vec3D p,Vec3D a,float fov){
+	Camera c = Camera_New();
+	c.p = p;
 	c.a = a;
 	c.fov = fov;
 	return c;
@@ -371,11 +369,12 @@ void Camera_Update(Camera* c){
 	if(c->a.x >  3.14159f * 0.5f - 0.01f) c->a.x =  3.14159f * 0.5f - 0.01f;
 	
 	M4x4D matCameraRotY = Matrix_MakeRotationY(c->a.y);
-	//M4x4D matCameraRotX = Matrix_MakeRotationX(c->a.x);
+	M4x4D matCameraRotX = Matrix_MakeRotationX(c->a.x);
 	
 	Vec3D lookdir = Vec3D_New(0.0f,0.0f,1.0f);
 	Vec3D sidedir = Vec3D_New(1.0f,0.0f,0.0f);
-	//lookdir = Matrix_MultiplyVector(matCameraRotX,lookdir);
+
+	lookdir = Matrix_MultiplyVector(matCameraRotX,lookdir);
 	lookdir = Matrix_MultiplyVector(matCameraRotY,lookdir);
 	//sidedir = Matrix_MultiplyVector(matCameraRotX,sidedir);
 	sidedir = Matrix_MultiplyVector(matCameraRotY,sidedir);
@@ -387,10 +386,83 @@ void Camera_Focus(Camera* c,Vec2 before,Vec2 now,Vec2 screen){
 	if(now.x!=before.x || now.y!=before.y){
 		Vec2 d = Vec2_Sub(now,before);
 		Vec2 a = Vec2_Mulf(Vec2_Div(d,(Vec2){ screen.x,screen.y }),8.0f * 3.141592654f);
-
 		c->a.y += a.x;
 		c->a.x += a.y;
 	}
+}
+
+
+typedef struct Rect3D {
+	Vec3D p;
+	Vec3D d;
+} Rect3D;
+
+char Rect3D_Overlap(Rect3D r1,Rect3D r2){
+	return !(r1.p.x<r2.p.x-r1.d.x || r1.p.y<r2.p.y-r1.d.y || r1.p.z<r2.p.z-r1.d.z || r1.p.x>r2.p.x+r2.d.x || r1.p.y>r2.p.y+r2.d.y || r1.p.z>r2.p.z+r2.d.z);
+}
+void Rect3D_Static(Rect3D* r1,Rect3D r2,void* Data,void (**Funcs)(void*)){
+	if(Rect3D_Overlap(*r1,r2)){
+        Vec3D m1 = Vec3D_Add(r1->p,Vec3D_Mul(r1->d,0.5f));
+        Vec3D m2 = Vec3D_Add(r2.p, Vec3D_Mul(r2.d, 0.5f));
+
+        Vec3D l = Vec3D_Add(r1->d,r2.d);
+        Vec3D d = Vec3D_Sub(m2,m1);
+        d = Vec3D_New(d.x / l.x,d.y / l.y,d.z / l.z);
+
+        if(F32_Abs(d.x)>F32_Abs(d.y)){
+            if(F32_Abs(d.x)>F32_Abs(d.z)){
+				if(d.x>0.0f){
+                	m1.x = m2.x - l.x * 0.5f;
+                	r1->p.x = m1.x - r1->d.x * 0.5f;
+
+                    if(Funcs[0]) Funcs[0](Data);
+            	}else{
+            	    m1.x = m2.x + l.x * 0.5f;
+            	    r1->p.x = m1.x - r1->d.x * 0.5f;
+
+                    if(Funcs[1]) Funcs[1](Data);
+            	}
+			}else{
+				if(d.z>0.0f){
+                	m1.z = m2.z - l.z * 0.5f;
+                	r1->p.z = m1.z - r1->d.z * 0.5f;
+
+                    if(Funcs[2]) Funcs[2](Data);
+            	}else{
+            	    m1.z = m2.z + l.z * 0.5f;
+            	    r1->p.z = m1.z - r1->d.z * 0.5f;
+
+                    if(Funcs[3]) Funcs[3](Data);
+            	}
+			}
+        }else{
+            if(F32_Abs(d.y)>F32_Abs(d.z)){
+				if(d.y>0.0f){
+                	m1.y = m2.y - l.y * 0.5f;
+                	r1->p.y = m1.y - r1->d.y * 0.5f;
+
+                    if(Funcs[4]) Funcs[4](Data);
+            	}else{
+            	    m1.y = m2.y + l.y * 0.5f;
+            	    r1->p.y = m1.y - r1->d.y * 0.5f;
+
+                    if(Funcs[5]) Funcs[5](Data);
+            	}
+			}else{
+				if(d.z>0.0f){
+                	m1.z = m2.z - l.z * 0.5f;
+                	r1->p.z = m1.z - r1->d.z * 0.5f;
+
+                    if(Funcs[2]) Funcs[2](Data);
+            	}else{
+            	    m1.z = m2.z + l.z * 0.5f;
+            	    r1->p.z = m1.z - r1->d.z * 0.5f;
+
+                    if(Funcs[3]) Funcs[3](Data);
+            	}
+			}
+        }
+    }
 }
 
 #endif

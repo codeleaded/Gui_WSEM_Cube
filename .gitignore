@@ -1,7 +1,6 @@
 # Build-Artefakte
 *.o
 *.out
-*.exe
 *.a
 *.so
 

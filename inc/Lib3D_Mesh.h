@@ -1,5 +1,5 @@
-#ifndef LIB3D_WORLD3D_H
-#define LIB3D_WORLD3D_H
+#ifndef LIB3D_MESH_H
+#define LIB3D_MESH_H
 
 #include "/home/codeleaded/System/Static/Library/Files.h"
 #include "/home/codeleaded/System/Static/Library/ConstParser.h"
@@ -79,72 +79,102 @@ void Mesh_Read(Mesh* m,char* Path){
 	}
 	Vector_Free(&verts);
 }
-// void Mesh_ReadTex(Mesh* m,char* Path){
-// 	if(!Files_isFile(Path)){
-// 		printf("[Mesh]: Read -> Error!\n");
-// 		return;
-// 	}
+void Mesh_ReadTex(Mesh* m,char* Path,char hasTexture){
+	if(!Files_isFile(Path)){
+		printf("[Mesh]: Read -> Error!\n");
+		return;
+	}
 
-// 	Vector verts = Vector_New(sizeof(Vec3D));
-// 	Vector texs = Vector_New(sizeof(Vec2D));
+	Vector verts = Vector_New(sizeof(Vec3D));
+	Vector texs = Vector_New(sizeof(Vec2D));
 
-// 	char* Content = Files_Path(Path);
-// 	int end = -1;
+	FilesSize fs;
+	char* Content = Files_ReadTB(Path,&fs);
+	int start = 0;
+	int end = 0;
 	
-// 	while(1){
-// 		char* line = Content + end + 1;
-// 		end = CStr_Find(line,'\n');
-// 		if(end<0) break;
+	while(1){
+		char* line = Content + end + 1;
+		end = CStr_Find(line,'\n');
+		if(end<0) break;
 
-// 		char junk;
+		char* lineIn = CStr_ChopTo(Content + start,'\n');
 
-// 		if (line[0] == 'v'){
-// 			if (line[1] == 't'){
-// 				Vec2D v;
-// 				s >> junk >> junk >> v.u >> v.v;
-// 				// A little hack for the spyro texture
-// 				//v.u = 1.0f - v.u;
-// 				//v.v = 1.0f - v.v;
-// 				texs.push_back(v);
-// 			}else{
-// 				Vec3D v;
-// 				s >> junk >> v.x >> v.y >> v.z;
-// 				verts.push_back(v);
-// 			}
-// 		}
-// 		if (!bHasTexture){
-// 			if (line[0] == 'f'){
-// 				int f[3];
-// 				s >> junk >> f[0] >> f[1] >> f[2];
-// 				tris.push_back({ verts[f[0] - 1], verts[f[1] - 1], verts[f[2] - 1] });
-// 			}
-// 		}else{
-// 			if (line[0] == 'f'){
-// 				s >> junk;
-// 				string tokens[6];
-// 				int nTokenCount = -1;
-// 				while (!s.eof())
-// 				{
-// 					char c = s.get();
-// 					if (c == ' ' || c == '/')
-// 						nTokenCount++;
-// 					else
-// 						tokens[nTokenCount].append(1, c);
-// 				}
-// 				tokens[nTokenCount].pop_back();
+		if (line[0] == 'v'){
+			if (line[1] == 't'){
+				Vec2D v;
+			
+				Vector vec = CStr_ChopDown(lineIn,' ');
+				//junk = *(char*)Vector_Get(&vec,0);
+				v.u = (float)Double_Parse((i8*)*(char**)Vector_Get(&vec,1),DOUBLE_SIGNED);
+				v.v = (float)Double_Parse((i8*)*(char**)Vector_Get(&vec,2),DOUBLE_SIGNED);
 				
-// 				tris.push_back({ 
-// 					verts[stoi(tokens[0]) - 1],
-// 					verts[stoi(tokens[2]) - 1],
-// 					verts[stoi(tokens[4]) - 1],
-// 					texs[stoi(tokens[1]) - 1],
-// 					texs[stoi(tokens[3]) - 1],
-// 					texs[stoi(tokens[5]) - 1]
-// 				});
-// 			}
-// 		}
-// 	}
-// }
+				for(int i = 0;i<vec.size;i++) free(*(char**)Vector_Get(&vec,i));
+				Vector_Free(&vec);
+
+				Vector_Push(&texs,&v);
+			}else{
+				Vec3D v = Vec3D_Null();
+			
+				Vector vec = CStr_ChopDown(lineIn,' ');
+				//junk = *(char*)Vector_Get(&vec,0);
+				v.x = (float)Double_Parse((i8*)*(char**)Vector_Get(&vec,1),DOUBLE_SIGNED);
+				v.y = (float)Double_Parse((i8*)*(char**)Vector_Get(&vec,2),DOUBLE_SIGNED);
+				v.z = (float)Double_Parse((i8*)*(char**)Vector_Get(&vec,3),DOUBLE_SIGNED);
+				
+				for(int i = 0;i<vec.size;i++) free(*(char**)Vector_Get(&vec,i));
+				Vector_Free(&vec);
+
+				Vector_Push(&verts,&v);
+			}
+		}
+		if (!hasTexture){
+			int f[3];
+
+			Vector vec = CStr_ChopDown(lineIn,' ');
+			//junk = *(char*)Vector_Get(&vec,0);
+			f[0] = (float)Number_Parse((i8*)*(char**)Vector_Get(&vec,1));
+			f[1] = (float)Number_Parse((i8*)*(char**)Vector_Get(&vec,2));
+			f[2] = (float)Number_Parse((i8*)*(char**)Vector_Get(&vec,3));
+			for(int i = 0;i<vec.size;i++) free(*(char**)Vector_Get(&vec,i));
+			Vector_Free(&vec);
+			
+			Tri3D t = {
+				.p = {
+					*(Vec3D*)Vector_Get(&verts,f[0] - 1),
+					*(Vec3D*)Vector_Get(&verts,f[1] - 1),
+					*(Vec3D*)Vector_Get(&verts,f[2] - 1)
+				},
+				.c = 0xFFFFFFFF
+			};
+			Tri3D_CalcNorm(&t);
+			Vector_Push(m,&t);
+		}else{
+			if (line[0] == 'f'){
+				// s >> junk;
+				// String tokens[6] = {String_New(),String_New(),String_New(),String_New(),String_New(),String_New()};
+				// int nTokenCount = -1;
+				// while (!s.eof())
+				// {
+				// 	char c = s.get();
+				// 	if (c == ' ' || c == '/')
+				// 		nTokenCount++;
+				// 	else
+				// 		tokens[nTokenCount].append(1, c);
+				// }
+				// tokens[nTokenCount].pop_back();
+				// tris.push_back({ 
+				// 	verts[stoi(tokens[0]) - 1],
+				// 	verts[stoi(tokens[2]) - 1],
+				// 	verts[stoi(tokens[4]) - 1],
+				// 	texs[stoi(tokens[1]) - 1],
+				// 	texs[stoi(tokens[3]) - 1],
+				// 	texs[stoi(tokens[5]) - 1]
+				// });
+			}
+		}
+	}
+}
 void Mesh_Write(Mesh* m,char* Path){
 	
 }
@@ -159,6 +189,7 @@ void Mesh_Free(Mesh* m){
 
 typedef struct World3D{
 	Mesh trisIn;
+	Mesh trisUpdate;
 	Mesh trisBuff;
 	Mesh trisOut;
 	M4x4D model;
@@ -171,6 +202,7 @@ typedef struct World3D{
 World3D World3D_New(){
 	World3D m;
 	m.trisIn = Vector_New(sizeof(Tri3D));
+	m.trisUpdate = Vector_New(sizeof(Tri3D));
 	m.trisBuff = Vector_New(sizeof(Tri3D));
 	m.trisOut = Vector_New(sizeof(Tri3D));
 	m.model = Matrix_MakeIdentity();
@@ -183,6 +215,7 @@ World3D World3D_New(){
 World3D World3D_Make(M4x4D model,M4x4D view,M4x4D proj){
 	World3D m;
 	m.trisIn = Vector_New(sizeof(Tri3D));
+	m.trisUpdate = Vector_New(sizeof(Tri3D));
 	m.trisBuff = Vector_New(sizeof(Tri3D));
 	m.trisOut = Vector_New(sizeof(Tri3D));
 	m.model = model;
@@ -217,7 +250,7 @@ void World3D_Tri3D_process(World3D* m,Tri3D* t,Vec3D camera,Vec2 output){
 	tri.p[1] = Matrix_MultiplyVector(m->model,tri.p[1]);
 	tri.p[2] = Matrix_MultiplyVector(m->model,tri.p[2]);
 	Tri3D_CalcNorm(&tri);
-	Tri3D_ShadeNorm(&tri,(Vec3D){ 0.2f,0.1f,-0.6f });
+	//Tri3D_ShadeNorm(&tri,(Vec3D){ 0.2f,0.1f,-0.6f });
 	
 	Vec3D vCameraRay = Vec3D_Sub(tri.p[0],camera);
 	float dp = Vec3D_DotProduct(tri.n,vCameraRay);
@@ -232,10 +265,10 @@ void World3D_Tri3D_process(World3D* m,Tri3D* t,Vec3D camera,Vec2 output){
 		tri.p[1] = Matrix_MultiplyVector(m->view,tri.p[1]);
 		tri.p[2] = Matrix_MultiplyVector(m->view,tri.p[2]);
 		
-		int nClippedTriangles = 0;
+		int nClippedTri3Ds = 0;
 		Tri3D clipped[2];
-		nClippedTriangles = Tri3D_ClipAgainstPlane(Vec3D_New(0.0f,0.0f,0.1f),Vec3D_New(0.0f,0.0f,1.0f),tri,&clipped[0],&clipped[1]);
-		for (int n = 0; n < nClippedTriangles; n++){
+		nClippedTri3Ds = Tri3D_ClipAgainstPlane(Vec3D_New(0.0f,0.0f,0.01f),Vec3D_New(0.0f,0.0f,1.0f),tri,&clipped[0],&clipped[1]);
+		for (int n = 0; n < nClippedTri3Ds; n++){
 			clipped[n].p[0] = Matrix_MultiplyVector(m->proj, clipped[n].p[0]);
 			clipped[n].p[1] = Matrix_MultiplyVector(m->proj, clipped[n].p[1]);
 			clipped[n].p[2] = Matrix_MultiplyVector(m->proj, clipped[n].p[2]);
@@ -273,6 +306,10 @@ void World3D_update(World3D* m,Vec3D p,Vec2 output){
 		Tri3D* t = (Tri3D*)Vector_Get(&m->trisIn,i);
 		World3D_Tri3D_process(m,t,p,output);
 	}
+	for(int i = 0;i<m->trisUpdate.size;i++){
+		Tri3D* t = (Tri3D*)Vector_Get(&m->trisUpdate,i);
+		World3D_Tri3D_process(m,t,p,output);
+	}
 	
 	qsort(m->trisBuff.Memory,m->trisBuff.size,m->trisBuff.ELEMENT_SIZE,World3D_Compare);
 
@@ -282,16 +319,16 @@ void World3D_update(World3D* m,Vec3D p,Vec2 output){
 
 		Vector list = Vector_New(sizeof(Tri3D));
 		Vector_Push(&list,triToRaster);
-		int nNewTriangles = 1;
+		int nNewTri3Ds = 1;
 
 		for (int p = 0; p < 4; p++)
 		{
 			int nTrisToAdd = 0;
-			while (nNewTriangles > 0)
+			while (nNewTri3Ds > 0)
 			{
 				Tri3D test = *(Tri3D*)Vector_Get(&list,0);
 				Vector_Remove(&list,0);
-				nNewTriangles--;
+				nNewTri3Ds--;
 
 				switch (p)
 				{
@@ -304,16 +341,19 @@ void World3D_update(World3D* m,Vec3D p,Vec2 output){
 				for (int w = 0; w < nTrisToAdd; w++)
 					Vector_Push(&list,&clipped[w]);
 			}
-			nNewTriangles = list.size;
+			nNewTri3Ds = list.size;
 		}
 
 		for(int i = 0;i<list.size;i++) Vector_Push(&m->trisOut,Vector_Get(&list,i));
 		Vector_Free(&list);
 	}
+
+	Vector_Clear(&m->trisUpdate);
 }
 
 void World3D_Free(World3D* m){
 	Vector_Free(&m->trisIn);
+	Vector_Free(&m->trisUpdate);
 	Vector_Free(&m->trisBuff);
 	Vector_Free(&m->trisOut);
 }

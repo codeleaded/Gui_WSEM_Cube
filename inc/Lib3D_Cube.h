@@ -107,7 +107,7 @@ Vec3D Lib3D_Cube_AS(int s){
 	return (Vec3D){ 0.0f,0.0f,0.0f,1.0f };
 }
 
-void Lib3D_Sides(Vector* trisOut,short sides,Vec3D p,Vec3D d,unsigned int c1,unsigned int c2){
+Tri3D Lib3D_Tri(Vec3D p,Vec3D d,unsigned int tri,unsigned int c1,unsigned int c2){
 	Tri3D tris[12] = {
 		// SOUTH
 		{ { { 0.0f, 0.0f, 0.0f, 1.0f },{ 0.0f, 1.0f, 0.0f, 1.0f },{ 1.0f, 1.0f, 0.0f, 1.0f } },{ 0.0f, 0.0f, 0.0f, 1.0f },c1 },
@@ -128,19 +128,26 @@ void Lib3D_Sides(Vector* trisOut,short sides,Vec3D p,Vec3D d,unsigned int c1,uns
 		{ { { 1.0f, 0.0f, 1.0f, 1.0f },{ 0.0f, 0.0f, 1.0f, 1.0f },{ 0.0f, 0.0f, 0.0f, 1.0f } },{ 0.0f, 0.0f, 0.0f, 1.0f },c1 },
 		{ { { 1.0f, 0.0f, 1.0f, 1.0f },{ 0.0f, 0.0f, 0.0f, 1.0f },{ 1.0f, 0.0f, 0.0f, 1.0f } },{ 0.0f, 0.0f, 0.0f, 1.0f },c2 },
 	};
-
+	Tri3D_Mul(tris + tri,d);
+	Tri3D_Offset(tris + tri,p);
+	return tris[tri];
+}
+void Lib3D_Sides(Vector* trisOut,short sides,Vec3D p,Vec3D d,unsigned int c1,unsigned int c2){
 	for(int i = 0;i < 12;i++){
 		if(sides & (1U << i)) continue;
 
-		for(int j = 0;j<3;j++)
-			tris[i].p[j] = Vec3D_Add(p,Vec3D_New(tris[i].p[j].x * d.x,tris[i].p[j].y * d.y,tris[i].p[j].z * d.z));
-		
-		Tri3D_CalcNorm(&tris[i]);
-		Vector_Push(trisOut,&tris[i]);
+		Tri3D tri = Lib3D_Tri(p,d,i,c1,c2);
+		Tri3D_CalcNorm(&tri);
+		Vector_Push(trisOut,&tri);
 	}
 }
 void Lib3D_Cube(Vector* trisOut,Vec3D p,Vec3D d,unsigned int c1,unsigned int c2){
 	Lib3D_Sides(trisOut,0,p,d,c1,c2);
+}
+void Lib3D_Plane(Vector* trisOut,Vec3D p,Vec3D d,unsigned int plane,unsigned int c1,unsigned int c2){
+	const unsigned int tri1 = 1 << ((plane << 1) + 0);
+	const unsigned int tri2 = 1 << ((plane << 1) + 1);
+	Lib3D_Sides(trisOut,~(tri1 | tri2),p,d,c1,c2);
 }
 Vector Lib3D_Cube_Make(Vec3D p,Vec3D d,unsigned int c1,unsigned int c2){
 	Vector trisOut = Vector_New(sizeof(Tri3D));
