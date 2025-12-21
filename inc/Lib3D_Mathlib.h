@@ -1,9 +1,18 @@
 #ifndef LIB3D_MATH_H
 #define LIB3D_MATH_H
 
+#if defined __linux__
 #include "/home/codeleaded/System/Static/Container/Vector.h"
 #include "/home/codeleaded/System/Static/Library/Vector2.h"
 #include "/home/codeleaded/System/Static/Library/Pixel.h"
+#elif defined _WIN32
+#include "F:/home/codeleaded/System/Static/Container/Vector.h"
+#include "F:/home/codeleaded/System/Static/Library/Vector2.h"
+#include "F:/home/codeleaded/System/Static/Library/Pixel.h"
+#else
+#error "Plattform not supported!"
+#endif
+
 
 typedef struct Vec2D{
 	float u;

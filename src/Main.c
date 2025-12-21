@@ -1,4 +1,10 @@
+#if defined __linux__
 #include "/home/codeleaded/System/Static/Library/WindowEngine1.0.h"
+#elif defined _WIN32
+#include "F:/home/codeleaded/System/Static/Library/WindowEngine1.0.h"
+#else
+#error "Plattform not supported!"
+#endif
 
 #include "../inc/Lib3D_Cube.h"
 #include "../inc/Lib3D_Mathlib.h"
