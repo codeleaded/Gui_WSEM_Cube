@@ -1,14 +1,7 @@
-#if defined __linux__
-#include "/home/codeleaded/System/Static/Library/WindowEngine1.0.h"
-#elif defined _WIN32
-#include "F:/home/codeleaded/System/Static/Library/WindowEngine1.0.h"
-#else
-#error "Plattform not supported!"
-#endif
-
-#include "../inc/Lib3D_Cube.h"
-#include "../inc/Lib3D_Mathlib.h"
-#include "../inc/Lib3D_Mesh.h"
+#include "../inc/Library/WindowEngine1.0.h"
+#include "../inc/Library/Lib3D_Cube.h"
+#include "../inc/Library/Lib3D_Mathlib.h"
+#include "../inc/Library/Lib3D_Mesh.h"
 
 
 Camera cam;
@@ -47,6 +40,12 @@ void Setup(AlxWindow* w){
 	world.normal = WORLD3D_NORMAL_CAP;
 
 	worldangle = (Vec3D){ 0.0f,0.0f,0.0f,1.0f };
+
+	//Mesh_Read(&world.trisIn,"./data/Teapot.obj");
+	//for(int i = 0;i<world.trisIn.size;i++){
+	//	Tri3D* t = (Tri3D*)Vector_Get(&world.trisIn,i);
+	//	Tri3D_ShadeNorm(t,(Vec3D){ 0.4f,0.5f,-0.6f });
+	//}
 }
 void Update(AlxWindow* w){
 	if(Menu==1){
@@ -59,7 +58,7 @@ void Update(AlxWindow* w){
 		Menu_Set(!Menu);
 
 	if(Stroke(ALX_KEY_Z).PRESSED)
-		Mode = Mode < 3 ? Mode+1 : 0;
+		Mode = Mode < 2 ? Mode+1 : 0;
 
 	if(Stroke(ALX_KEY_W).DOWN)
 		cam.p = Vec3D_Add(cam.p,Vec3D_Mul(cam.ld,Speed * w->ElapsedTime));

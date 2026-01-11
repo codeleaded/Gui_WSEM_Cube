@@ -1,18 +1,9 @@
 #ifndef LIB3D_MATH_H
 #define LIB3D_MATH_H
 
-#if defined __linux__
-#include "/home/codeleaded/System/Static/Container/Vector.h"
-#include "/home/codeleaded/System/Static/Library/Vector2.h"
-#include "/home/codeleaded/System/Static/Library/Pixel.h"
-#elif defined _WIN32
-#include "F:/home/codeleaded/System/Static/Container/Vector.h"
-#include "F:/home/codeleaded/System/Static/Library/Vector2.h"
-#include "F:/home/codeleaded/System/Static/Library/Pixel.h"
-#else
-#error "Plattform not supported!"
-#endif
-
+#include "../Container/Vector.h"
+#include "Vector2.h"
+#include "Pixel.h"
 
 typedef struct Vec2D{
 	float u;
@@ -361,7 +352,7 @@ Camera Camera_New(){
 	c.p = (Vec3D){ 0.0f,0.0f,0.0f,1.0f };
 	c.up = (Vec3D){ 0.0f,1.0f,0.0f,1.0f };
 	c.ld = (Vec3D){ 0.0f,0.0f,1.0f,1.0f };
-	c.sd = (Vec3D){ 1.0f,0.0f,0.0f,1.0f };
+	c.ld = (Vec3D){ 1.0f,0.0f,0.0f,1.0f };
 	c.a = (Vec3D){ 0.0f,0.0f,0.0f,1.0f };
 	c.fov = 90.0f;
 	return c;

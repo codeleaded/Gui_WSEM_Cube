@@ -1,16 +1,8 @@
 #ifndef LIB3D_MESH_H
 #define LIB3D_MESH_H
 
-#if defined __linux__
-#include "/home/codeleaded/System/Static/Library/Files.h"
-#include "/home/codeleaded/System/Static/Library/ConstParser.h"
-#elif defined _WIN32
-#include "F:/home/codeleaded/System/Static/Library/Files.h"
-#include "F:/home/codeleaded/System/Static/Library/ConstParser.h"
-#else
-#error "Plattform not supported!"
-#endif
-
+#include "Files.h"
+#include "ConstParser.h"
 #include "Lib3D_Mathlib.h"
 
 
