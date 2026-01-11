@@ -84,15 +84,15 @@ Gui_WSEM_Cube/
 How to install and set up your project:
 
 ```bash
-# Example installation commands
+# Example installation commands for .[linux/windows/wine]
 git clone https://github.com/codeleaded/Gui_WSEM_Cube.git
 cd Gui_WSEM_Cube
 # just build
-make all
+make -f Makefile.linux all
 # build and run
-make do
+make -f Makefile.linux  do
 # run after build
-make exe
+make -f Makefile.linux  exe
 # clean build
-make clean
+make -f Makefile.linux  clean
 ```
