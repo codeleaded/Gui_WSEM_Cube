@@ -1,16 +1,27 @@
 #ifndef FILES_H
 #define FILES_H
 
-#include "String.h"
-
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "String.h"
+
+#if defined __linux__
 #include <unistd.h>
 #include <sys/stat.h>
-#include <string.h>
 #include <dirent.h>
 #include <libgen.h>
 #include <fcntl.h>
+#elif defined _WINE || _WIN32
+//#define _CRT_SECURE_NO_WARNINGS
+#include <windows.h>
+#include <direct.h>
+#include <io.h>
+#include <sys/stat.h>
+#else
+#error "Plattform not supported!"
+#endif
 
 
 typedef long long               FilesSize;
@@ -20,6 +31,8 @@ typedef long long               FilesSize;
 #define FILES_DIRECTORY         1
 #define FILES_FILE              2
 #define FILES_UNKOWNTYPE        3
+#define FILES_MAX_PATH    4096
+#define FILES_BUFFER_SIZE 8192
 
 FilesSize Files_Size(char* Path){
     FILE* f = fopen(Path,"rb");
@@ -33,32 +46,60 @@ FilesSize Files_Size(char* Path){
     return FILES_INVALID_SIZE;
 }
 
-char* Files_cwd(){
-    char buffer[1024];
-    memset(buffer,0,1024);
-    if (getcwd(buffer,sizeof(buffer))==NULL) {
+char* Files_cwd() {
+    char buffer[FILES_MAX_PATH];
+    memset(buffer, 0, sizeof(buffer));
+
+#if defined(_WIN32)
+    if (_getcwd(buffer, sizeof(buffer)) == NULL)
         return NULL;
-    }
+#else
+    if (getcwd(buffer, sizeof(buffer)) == NULL)
+        return NULL;
+#endif
+
     return CStr_Cpy(buffer);
 }
-char Files_getType(char* Path){
-    struct stat statbuf;
-
-    if (stat(Path, &statbuf) == -1) {
+char Files_getType(char* Path) {
+#if defined(_WIN32)
+    struct _stat st;
+    if (_stat(Path, &st) != 0)
         return FILES_INVALID;
-    }
 
-    if (S_ISDIR(statbuf.st_mode)) {
+    if (st.st_mode & _S_IFDIR)
         return FILES_DIRECTORY;
-    } else if (S_ISREG(statbuf.st_mode)) {
+    if (st.st_mode & _S_IFREG)
         return FILES_FILE;
-    } else {
-        return FILES_UNKOWNTYPE;
-    }
-    return FILES_INVALID;
+#else
+    struct stat st;
+    if (stat(Path, &st) != 0)
+        return FILES_INVALID;
+
+    if (S_ISDIR(st.st_mode))
+        return FILES_DIRECTORY;
+    if (S_ISREG(st.st_mode))
+        return FILES_FILE;
+#endif
+
+    return FILES_UNKOWNTYPE;
 }
 
 void Files_Mkdir(const char* dir){
+#if defined _WINE || _WIN32
+    DWORD attr = GetFileAttributesA(dir);
+
+    if (attr == INVALID_FILE_ATTRIBUTES) {
+        if (CreateDirectoryA(dir, NULL)) {
+            printf("[Files]: Mkdir -> Dir '%s' created!\n", dir);
+        } else {
+            printf("[Files]: Mkdir -> Error %lu\n", GetLastError());
+        }
+    } else if (attr & FILE_ATTRIBUTE_DIRECTORY) {
+        printf("[Files]: Mkdir -> Dir '%s' exists already!\n", dir);
+    } else {
+        printf("[Files]: Mkdir -> Path exists but is not a directory!\n");
+    }
+#elif defined __linux__
     struct stat st = {0};
     if (stat(dir, &st) == -1) {
         if (mkdir(dir, 0755) == 0) {
@@ -69,6 +110,9 @@ void Files_Mkdir(const char* dir){
     } else {
         printf("[Files]: Mkdir -> Dir '%s' exists already!\n", dir);
     }
+#else
+#error "Plattform not supported!"
+#endif
 }
 
 char Files_isDir(char* Path){
@@ -271,99 +315,144 @@ char* Files_DirNameStepBack(char* Path,char* other,int step){
 }
 
 
-#define FILES_MAX_PATH    4096
-#define FILES_BUFFER_SIZE 8192
+void Files_Walk(const char *base_path, void (*fn)(char* path)) {
 
-void Files_Walk(const char *base_path,void (*fn)(char* path)){
-    struct dirent *entry;
-    DIR *dir = opendir(base_path);
+#if defined(_WIN32)
 
-    if (!dir) {
-        perror("opendir failed");
+    char search_path[FILES_MAX_PATH];
+    snprintf(search_path, sizeof(search_path), "%s\\*", base_path);
+
+    WIN32_FIND_DATAA fd;
+    HANDLE h = FindFirstFileA(search_path, &fd);
+
+    if (h == INVALID_HANDLE_VALUE)
         return;
-    }
+
+    do {
+        if (!strcmp(fd.cFileName, ".") || !strcmp(fd.cFileName, ".."))
+            continue;
+
+        char full_path[FILES_MAX_PATH];
+        snprintf(full_path, sizeof(full_path), "%s\\%s", base_path, fd.cFileName);
+
+        fn(full_path);
+
+    } while (FindNextFileA(h, &fd));
+
+    FindClose(h);
+
+#else
+
+    DIR *dir = opendir(base_path);
+    if (!dir) return;
+
+    struct dirent *entry;
 
     while ((entry = readdir(dir)) != NULL) {
-        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+        if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
             continue;
 
         char full_path[FILES_MAX_PATH];
         snprintf(full_path, sizeof(full_path), "%s/%s", base_path, entry->d_name);
 
-        struct stat st;
-        if (stat(full_path, &st) == -1) {
-            printf("[Files]: Walk -> ");
-            perror("stat failed");
-            continue;
-        }else{
-            //printf("[Files]: Walk -> Found: %s | %s\n",entry->d_name,full_path);
-        }
-
-        //if (S_ISDIR(st.st_mode))
         fn(full_path);
     }
 
     closedir(dir);
-}
-void Files_WalkR(const char *base_path,void (*fn)(char* path)){
-    struct dirent *entry;
-    DIR *dir = opendir(base_path);
 
-    if (!dir) {
-        perror("opendir failed");
-        return;
-    }
+#endif
+}
+void Files_WalkR(const char *base_path, void (*fn)(char* path)) {
+
+#if defined(_WIN32)
+
+    char search_path[FILES_MAX_PATH];
+    snprintf(search_path, sizeof(search_path), "%s\\*", base_path);
+
+    WIN32_FIND_DATAA fd;
+    HANDLE h = FindFirstFileA(search_path, &fd);
+    if (h == INVALID_HANDLE_VALUE) return;
+
+    do {
+        if (!strcmp(fd.cFileName, ".") || !strcmp(fd.cFileName, ".."))
+            continue;
+
+        char full_path[FILES_MAX_PATH];
+        snprintf(full_path, sizeof(full_path), "%s\\%s", base_path, fd.cFileName);
+
+        if (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+            fn(full_path);
+            Files_WalkR(full_path, fn);
+        }
+
+    } while (FindNextFileA(h, &fd));
+
+    FindClose(h);
+
+#else
+
+    DIR *dir = opendir(base_path);
+    if (!dir) return;
+
+    struct dirent *entry;
 
     while ((entry = readdir(dir)) != NULL) {
-        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+        if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
             continue;
 
         char full_path[FILES_MAX_PATH];
         snprintf(full_path, sizeof(full_path), "%s/%s", base_path, entry->d_name);
 
         struct stat st;
-        if (stat(full_path, &st) == -1) {
-            perror("stat failed");
-            continue;
-        }
-
-        if (S_ISDIR(st.st_mode)) {
+        if (stat(full_path, &st) == 0 && S_ISDIR(st.st_mode)) {
             fn(full_path);
-            Files_WalkR(full_path,fn);
+            Files_WalkR(full_path, fn);
         }
     }
 
     closedir(dir);
+
+#endif
 }
 
-char Files_HasSub(char *base_path,char *sub_path){
-    struct dirent *entry;
+char Files_HasSub(char *base_path, char *sub_path) {
+
+#if defined(_WIN32)
+
+    char search_path[FILES_MAX_PATH];
+    snprintf(search_path, sizeof(search_path), "%s\\*", base_path);
+
+    WIN32_FIND_DATAA fd;
+    HANDLE h = FindFirstFileA(search_path, &fd);
+    if (h == INVALID_HANDLE_VALUE) return 0;
+
+    do {
+        if (!strcmp(fd.cFileName, sub_path)) {
+            FindClose(h);
+            return 1;
+        }
+    } while (FindNextFileA(h, &fd));
+
+    FindClose(h);
+    return 0;
+
+#else
+
     DIR *dir = opendir(base_path);
+    if (!dir) return 0;
 
-    if (!dir) {
-        perror("opendir failed");
-        return 0;
-    }
-
+    struct dirent *entry;
     while ((entry = readdir(dir)) != NULL) {
-        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-            continue;
-
-        char full_path[FILES_MAX_PATH];
-        snprintf(full_path, sizeof(full_path), "%s/%s", base_path, entry->d_name);
-
-        struct stat st;
-        if (stat(full_path, &st) == -1) {
-            printf("[Files]: Walk -> ");
-            perror("stat failed");
-            continue;
-        }else{
-            if(CStr_Cmp(entry->d_name,sub_path)) return 1;
+        if (!strcmp(entry->d_name, sub_path)) {
+            closedir(dir);
+            return 1;
         }
     }
 
     closedir(dir);
     return 0;
+
+#endif
 }
 
 #endif // !FILES_H
