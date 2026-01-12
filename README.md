@@ -81,6 +81,13 @@ Gui_WSEM_Cube/
 
 ## Installation
 
+Install make, gcc(use f.e. 13.x.x, 15.x.x isn't working), git via scoop:
+```bash
+scoop update
+scoop install make gcc git
+```
+
+
 How to install and set up your project:
 
 ```bash
